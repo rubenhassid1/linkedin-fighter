@@ -152,22 +152,41 @@
     }
     .status-sub { margin-top: 10px; font-size: clamp(6px,1.1vw,8px); color: #555; letter-spacing: 2px; }
 
-    /* Blink prompt */
-    .press-start {
-      text-align: center;
-      font-size: clamp(6px, 1.2vw, 9px);
-      color: #ffcc00;
-      animation: blink 1s steps(1) infinite;
+    /* Refresh button */
+    #refreshBtn {
+      display: block;
+      width: 100%;
+      padding: 16px 24px;
       margin-bottom: 1.5rem;
-    }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-    button.press-start {
-      background: none;
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(10px, 2vw, 14px);
+      color: #000;
+      background: #ffcc00;
       border: none;
       cursor: pointer;
-      font-family: inherit;
+      letter-spacing: 2px;
+      box-shadow: 0 6px 0 #996600, 0 8px 16px rgba(0,0,0,0.5);
+      transition: transform 0.1s, box-shadow 0.1s;
+      animation: btn-pulse 2s ease-in-out infinite alternate;
     }
-    button.press-start:active { transform: scale(0.95); }
+    #refreshBtn:hover {
+      background: #ffe066;
+    }
+    #refreshBtn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #996600, 0 4px 8px rgba(0,0,0,0.5);
+    }
+    #refreshBtn:disabled {
+      background: #555;
+      color: #888;
+      box-shadow: 0 2px 0 #333;
+      cursor: not-allowed;
+      animation: none;
+    }
+    @keyframes btn-pulse {
+      from { box-shadow: 0 6px 0 #996600, 0 8px 16px rgba(0,0,0,.5); }
+      to   { box-shadow: 0 6px 0 #996600, 0 8px 30px rgba(255,204,0,.4); }
+    }
 
     /* Live indicator */
     .live-dot {
@@ -226,7 +245,7 @@
       <div class="status-sub" id="statusSub"></div>
     </div>
 
-    <button class="press-start" id="refreshBtn" onclick="manualRefresh()">▶ PRESS START TO WIN ◀</button>
+    <button id="refreshBtn" onclick="manualRefresh()">▶ PRESS START TO WIN ◀</button>
     <div class="footer" id="footer"></div>
   </div>
 
@@ -370,11 +389,11 @@
 
     function manualRefresh() {
       const btn = document.getElementById('refreshBtn');
+      btn.disabled = true;
       btn.textContent = '⏳ LOADING...';
-      btn.style.animationName = 'none';
       loadLive().finally(() => {
         btn.textContent = '▶ PRESS START TO WIN ◀';
-        btn.style.animationName = '';
+        btn.disabled = false;
       });
     }
 
