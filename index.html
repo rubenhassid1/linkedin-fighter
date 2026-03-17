@@ -154,6 +154,8 @@
 
     /* Refresh button */
     #refreshBtn {
+      position: relative;
+      z-index: 1000;
       display: block;
       width: 100%;
       padding: 16px 24px;
@@ -167,25 +169,17 @@
       letter-spacing: 2px;
       box-shadow: 0 6px 0 #996600, 0 8px 16px rgba(0,0,0,0.5);
       transition: transform 0.1s, box-shadow 0.1s;
-      animation: btn-pulse 2s ease-in-out infinite alternate;
     }
-    #refreshBtn:hover {
-      background: #ffe066;
-    }
+    #refreshBtn:hover { background: #ffe066; }
     #refreshBtn:active {
       transform: translateY(4px);
-      box-shadow: 0 2px 0 #996600, 0 4px 8px rgba(0,0,0,0.5);
+      box-shadow: 0 2px 0 #996600;
     }
     #refreshBtn:disabled {
-      background: #555;
+      background: #444;
       color: #888;
-      box-shadow: 0 2px 0 #333;
+      box-shadow: 0 2px 0 #222;
       cursor: not-allowed;
-      animation: none;
-    }
-    @keyframes btn-pulse {
-      from { box-shadow: 0 6px 0 #996600, 0 8px 16px rgba(0,0,0,.5); }
-      to   { box-shadow: 0 6px 0 #996600, 0 8px 30px rgba(255,204,0,.4); }
     }
 
     /* Live indicator */
@@ -245,7 +239,7 @@
       <div class="status-sub" id="statusSub"></div>
     </div>
 
-    <button id="refreshBtn" onclick="manualRefresh()">▶ PRESS START TO WIN ◀</button>
+    <button id="refreshBtn">▶ PRESS START TO WIN ◀</button>
     <div class="footer" id="footer"></div>
   </div>
 
@@ -396,6 +390,8 @@
         btn.disabled = false;
       });
     }
+
+    document.getElementById('refreshBtn').addEventListener('click', manualRefresh);
 
     loadLive();
     setInterval(loadLive, 10 * 60 * 1000);
