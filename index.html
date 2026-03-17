@@ -280,7 +280,8 @@
       const d = rows[rows.length - 1];
       const { chris, ruben, gap, date, hour, chris_daily, ruben_daily, growth_diff } = d;
 
-      const pct = Math.min(100, Math.max(0, (gap / startGap) * 100));
+      // pct = gap as share of Chris's followers → true relative distance to parity
+      const pct = Math.max(0, (gap / chris) * 100);
 
       document.getElementById('chrisCount').textContent = fmt(chris);
       document.getElementById('rubenCount').textContent = fmt(ruben);
@@ -299,8 +300,9 @@
       const bar = document.getElementById('barFill');
       bar.style.width = pct + '%';
       bar.className = 'bar-fill';
-      if      (pct <= 25) bar.classList.add('danger');
-      else if (pct <= 60) bar.classList.add('warning');
+      // thresholds relative to Chris's follower count
+      if      (pct <= 15) bar.classList.add('danger');   // very close, flicker red
+      else if (pct <= 45) bar.classList.add('warning');  // closing in, yellow
 
       if (gap <= 0) {
         bar.style.width = '0%';
@@ -319,12 +321,12 @@
         const sub  = document.getElementById('statusSub');
         main.className = 'status-main';
 
-        if (pct > 60) {
+        if (pct > 45) {
           main.textContent = 'FIGHT!';
           sub.textContent = growth_diff < 0
             ? 'CHRIS IS PULLING AHEAD TODAY...'
             : 'RUBEN IS CLOSING THE GAP TODAY!';
-        } else if (pct > 25) {
+        } else if (pct > 15) {
           main.textContent = 'CLOSING IN!';
           sub.textContent = 'RUBEN IS GAINING GROUND!';
         } else {
