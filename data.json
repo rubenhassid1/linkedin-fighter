@@ -1,0 +1,35 @@
+{
+  "start_gap": 422770,
+  "latest": {
+    "date": "17/03/2026",
+    "hour": "11:57",
+    "chris": 1213977,
+    "ruben": 791170,
+    "gap": 422807,
+    "chris_daily": 39,
+    "ruben_daily": 2,
+    "growth_diff": -37
+  },
+  "history": [
+    {
+      "date": "17/03/2026",
+      "hour": "11:51",
+      "chris": 1213938,
+      "ruben": 791168,
+      "gap": 422770,
+      "chris_daily": null,
+      "ruben_daily": null,
+      "growth_diff": null
+    },
+    {
+      "date": "17/03/2026",
+      "hour": "11:57",
+      "chris": 1213977,
+      "ruben": 791170,
+      "gap": 422807,
+      "chris_daily": 39,
+      "ruben_daily": 2,
+      "growth_diff": -37
+    }
+  ]
+}

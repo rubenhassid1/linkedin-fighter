@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LINKEDIN FIGHTER II</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #000;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Press Start 2P', monospace;
+      color: #fff;
+      background: radial-gradient(ellipse at 50% 30%, #0d001a 0%, #000 70%);
+      overflow: hidden;
+    }
+
+    /* CRT scanlines */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.12) 3px,
+        rgba(0,0,0,0.12) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .container {
+      width: min(95vw, 700px);
+      padding: 1.5rem 2rem;
+    }
+
+    /* Title */
+    .title {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .title-main {
+      display: block;
+      font-size: clamp(18px, 4.5vw, 34px);
+      color: #ffcc00;
+      text-shadow:
+        3px 3px 0 #cc8800,
+        5px 5px 0 #995500,
+        7px 7px 0 #662200;
+      letter-spacing: 3px;
+      margin-bottom: 0.6rem;
+    }
+
+    .title-sub {
+      display: block;
+      font-size: clamp(7px, 1.4vw, 10px);
+      color: #884400;
+      letter-spacing: 4px;
+    }
+
+    /* Fighter name labels */
+    .fighter-labels {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 7px;
+    }
+
+    .lbl {
+      font-size: clamp(10px, 2.2vw, 16px);
+      letter-spacing: 2px;
+    }
+
+    .lbl-chris { color: #44aaff; }
+    .lbl-ruben { color: #ff4444; }
+
+    /* Health bar */
+    .bar-wrapper {
+      border: 3px solid #ffcc00;
+      padding: 3px;
+      background: #111;
+      box-shadow:
+        0 0 0 2px #000,
+        0 0 24px rgba(255,204,0,0.35),
+        inset 0 0 6px rgba(0,0,0,0.8);
+      margin-bottom: 1.8rem;
+    }
+
+    .bar-track {
+      height: 36px;
+      background: #0a0a0a;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Segment dividers on top */
+    .bar-track::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent calc(10% - 1px),
+        rgba(0,0,0,0.5) calc(10% - 1px),
+        rgba(0,0,0,0.5) 10%
+      );
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .bar-fill {
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 100%;
+      background: linear-gradient(90deg,
+        #005500 0%, #009933 40%, #00cc55 75%, #44ff88 100%
+      );
+      transition: width 2s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1;
+    }
+
+    .bar-fill.warning {
+      background: linear-gradient(90deg,
+        #553300 0%, #aa6600 40%, #ddaa00 75%, #ffdd44 100%
+      );
+    }
+
+    .bar-fill.danger {
+      background: linear-gradient(90deg,
+        #550000 0%, #aa2200 40%, #dd4400 75%, #ff7744 100%
+      );
+      animation: flicker 0.4s steps(2) infinite;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 1.8rem;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .stat.right { text-align: right; }
+
+    .stat-label {
+      font-size: clamp(5px, 1vw, 7px);
+      color: #555;
+      letter-spacing: 1px;
+    }
+
+    .stat-count {
+      font-size: clamp(11px, 2.2vw, 16px);
+      color: #fff;
+    }
+
+    .stat-daily {
+      font-size: clamp(6px, 1.1vw, 8px);
+      min-height: 1em;
+    }
+
+    .stat-daily.up   { color: #44ff44; }
+    .stat-daily.down { color: #ff4444; }
+    .stat-daily.flat { color: #555; }
+
+    /* Center gap */
+    .gap-center {
+      text-align: center;
+    }
+
+    .gap-num {
+      font-size: clamp(13px, 2.8vw, 20px);
+      color: #ffcc00;
+    }
+
+    .gap-lbl {
+      font-size: clamp(5px, 0.9vw, 7px);
+      color: #555;
+      letter-spacing: 1px;
+      margin-top: 5px;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #2a2a2a, transparent);
+      margin: 0 0 1.5rem;
+    }
+
+    /* Status */
+    .status {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .status-main {
+      font-size: clamp(20px, 5vw, 36px);
+      color: #ffcc00;
+      letter-spacing: 5px;
+      animation: glow 2.5s ease-in-out infinite alternate;
+    }
+
+    .status-main.ko {
+      color: #ff0000;
+      font-size: clamp(28px, 7vw, 52px);
+      animation: ko-flash 0.4s steps(2) infinite;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 2px 2px 0 #996600; }
+      to   { text-shadow: 2px 2px 0 #996600, 0 0 40px rgba(255,204,0,0.5); }
+    }
+
+    @keyframes ko-flash {
+      0%   { color: #ff0000; text-shadow: 0 0 30px #ff0000; }
+      50%  { color: #ffcc00; text-shadow: 0 0 40px #ffaa00; }
+      100% { color: #ff0000; text-shadow: 0 0 30px #ff0000; }
+    }
+
+    .status-sub {
+      margin-top: 10px;
+      font-size: clamp(6px, 1.1vw, 8px);
+      color: #555;
+      letter-spacing: 2px;
+    }
+
+    /* Blink prompt */
+    .press-start {
+      text-align: center;
+      font-size: clamp(6px, 1.2vw, 9px);
+      color: #ffcc00;
+      animation: blink 1s steps(1) infinite;
+      margin-bottom: 1.5rem;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    .footer {
+      text-align: center;
+      font-size: clamp(5px, 0.85vw, 7px);
+      color: #2a2a2a;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="title">
+      <span class="title-main">LINKEDIN FIGHTER II</span>
+      <span class="title-sub">THE FOLLOWERS WAR</span>
+    </div>
+
+    <div class="fighter-labels">
+      <span class="lbl lbl-chris">CHRIS</span>
+      <span class="lbl lbl-ruben">RUBEN</span>
+    </div>
+
+    <div class="bar-wrapper">
+      <div class="bar-track">
+        <div class="bar-fill" id="barFill"></div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-label">CHRIS FOLLOWERS</span>
+        <span class="stat-count" id="chrisCount">—</span>
+        <span class="stat-daily flat" id="chrisDaily"></span>
+      </div>
+
+      <div class="gap-center">
+        <div class="gap-num" id="gapNum">—</div>
+        <div class="gap-lbl" id="gapLbl">GAP</div>
+      </div>
+
+      <div class="stat right">
+        <span class="stat-label">RUBEN FOLLOWERS</span>
+        <span class="stat-count" id="rubenCount">—</span>
+        <span class="stat-daily flat" id="rubenDaily"></span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="status">
+      <div class="status-main" id="statusMain">LOADING...</div>
+      <div class="status-sub" id="statusSub"></div>
+    </div>
+
+    <div class="press-start">▶ PRESS START TO WIN ◀</div>
+
+    <div class="footer" id="footer"></div>
+
+  </div>
+
+  <script>
+    function fmt(n) {
+      return Math.abs(Math.round(n)).toLocaleString();
+    }
+
+    function updateUI(data) {
+      const { latest, start_gap } = data;
+      const { chris, ruben, gap, date, hour, chris_daily, ruben_daily, growth_diff } = latest;
+
+      // Health % = how much of the original gap remains
+      const pct = Math.min(100, Math.max(0, (gap / start_gap) * 100));
+
+      // Follower counts
+      document.getElementById('chrisCount').textContent = fmt(chris);
+      document.getElementById('rubenCount').textContent = fmt(ruben);
+
+      // Daily changes
+      if (chris_daily !== null && chris_daily !== undefined) {
+        const el = document.getElementById('chrisDaily');
+        el.textContent = (chris_daily >= 0 ? '+' : '') + fmt(chris_daily) + ' TODAY';
+        el.className = 'stat-daily ' + (chris_daily > 0 ? 'up' : chris_daily < 0 ? 'down' : 'flat');
+      }
+      if (ruben_daily !== null && ruben_daily !== undefined) {
+        const el = document.getElementById('rubenDaily');
+        el.textContent = (ruben_daily >= 0 ? '+' : '') + fmt(ruben_daily) + ' TODAY';
+        el.className = 'stat-daily ' + (ruben_daily > 0 ? 'up' : ruben_daily < 0 ? 'down' : 'flat');
+      }
+
+      // Health bar
+      const bar = document.getElementById('barFill');
+      bar.style.width = pct + '%';
+      bar.className = 'bar-fill';
+      if (pct <= 25) bar.classList.add('danger');
+      else if (pct <= 60) bar.classList.add('warning');
+
+      // Gap display
+      if (gap <= 0) {
+        document.getElementById('gapNum').textContent = fmt(Math.abs(gap));
+        document.getElementById('gapLbl').textContent = 'RUBEN LEADS!';
+        document.getElementById('gapLbl').style.color = '#44ff44';
+      } else {
+        document.getElementById('gapNum').textContent = fmt(gap);
+        document.getElementById('gapLbl').textContent = 'CHRIS LEADS';
+        document.getElementById('gapLbl').style.color = '';
+      }
+
+      // Status message
+      const main = document.getElementById('statusMain');
+      const sub  = document.getElementById('statusSub');
+
+      if (gap <= 0) {
+        bar.style.width = '0%';
+        main.textContent = 'K.O.!';
+        main.className = 'status-main ko';
+        sub.textContent = 'RUBEN WINS! FLAWLESS VICTORY!';
+      } else if (pct > 60) {
+        main.textContent = 'FIGHT!';
+        main.className = 'status-main';
+        sub.textContent = growth_diff < 0
+          ? 'CHRIS IS PULLING AHEAD TODAY...'
+          : 'RUBEN IS CLOSING THE GAP TODAY!';
+      } else if (pct > 25) {
+        main.textContent = 'CLOSING IN!';
+        main.className = 'status-main';
+        sub.textContent = 'RUBEN IS GAINING GROUND!';
+      } else {
+        main.textContent = 'ALMOST THERE!';
+        main.className = 'status-main';
+        sub.textContent = "CHRIS IS ON THE ROPES!";
+      }
+
+      document.getElementById('footer').textContent = `LAST UPDATE: ${date}  ${hour}`;
+    }
+
+    async function loadData() {
+      try {
+        const r = await fetch('./data.json?t=' + Date.now());
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const data = await r.json();
+        updateUI(data);
+      } catch (e) {
+        document.getElementById('statusMain').textContent = 'ERROR';
+        document.getElementById('statusSub').textContent = 'COULD NOT LOAD DATA';
+        console.error(e);
+      }
+    }
+
+    loadData();
+    setInterval(loadData, 5 * 60 * 1000); // refresh every 5 min
+  </script>
+</body>
+</html>
