@@ -9,7 +9,6 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background: #000;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -18,9 +17,9 @@
       font-family: 'Press Start 2P', monospace;
       color: #fff;
       background: radial-gradient(ellipse at 50% 30%, #0d001a 0%, #000 70%);
-      overflow: hidden;
     }
 
+    /* CRT scanlines — pointer-events:none so they never block clicks */
     body::before {
       content: '';
       position: fixed;
@@ -30,10 +29,15 @@
         rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px
       );
       pointer-events: none;
-      z-index: 999;
+      z-index: 1;
     }
 
-    .container { width: min(95vw, 700px); padding: 1.5rem 2rem; }
+    .container {
+      position: relative;
+      z-index: 2;
+      width: min(95vw, 700px);
+      padding: 1.5rem 2rem;
+    }
 
     /* Title */
     .title { text-align: center; margin-bottom: 2.5rem; }
@@ -56,7 +60,6 @@
     .fighter-labels {
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
       margin-bottom: 7px;
     }
     .lbl { font-size: clamp(10px, 2.2vw, 16px); letter-spacing: 2px; }
@@ -68,7 +71,7 @@
       border: 3px solid #ffcc00;
       padding: 3px;
       background: #111;
-      box-shadow: 0 0 0 2px #000, 0 0 24px rgba(255,204,0,0.35), inset 0 0 6px rgba(0,0,0,0.8);
+      box-shadow: 0 0 0 2px #000, 0 0 24px rgba(255,204,0,0.35);
       margin-bottom: 1.8rem;
     }
     .bar-track {
@@ -83,7 +86,7 @@
       inset: 0;
       background: repeating-linear-gradient(
         90deg, transparent, transparent calc(10% - 1px),
-        rgba(0,0,0,0.5) calc(10% - 1px), rgba(0,0,0,0.5) 10%
+        rgba(0,0,0,0.45) calc(10% - 1px), rgba(0,0,0,0.45) 10%
       );
       z-index: 2;
       pointer-events: none;
@@ -91,7 +94,7 @@
     .bar-fill {
       position: absolute;
       top: 0; left: 0; bottom: 0;
-      width: 100%;
+      width: 0;
       background: linear-gradient(90deg, #005500 0%, #009933 40%, #00cc55 75%, #44ff88 100%);
       transition: width 2s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 1;
@@ -105,13 +108,13 @@
     }
     @keyframes flicker { 0%,100%{opacity:1} 50%{opacity:.6} }
 
-    /* Stats */
+    /* Stats row */
     .stats {
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       gap: 0.5rem;
       align-items: center;
-      margin-bottom: 1.8rem;
+      margin-bottom: 1.5rem;
     }
     .stat { display: flex; flex-direction: column; gap: 5px; }
     .stat.right { text-align: right; }
@@ -124,6 +127,31 @@
     .gap-center { text-align: center; }
     .gap-num { font-size: clamp(13px,2.8vw,20px); color: #ffcc00; }
     .gap-lbl  { font-size: clamp(5px,0.9vw,7px); color: #555; letter-spacing: 1px; margin-top: 5px; }
+
+    /* Overtake prediction box */
+    .predict-box {
+      border: 1px solid #333;
+      padding: 14px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .predict-label {
+      font-size: clamp(5px, 0.9vw, 7px);
+      color: #555;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .predict-date {
+      font-size: clamp(12px, 2.5vw, 18px);
+      color: #44ff44;
+      margin-bottom: 6px;
+    }
+    .predict-date.bad { color: #ff4444; }
+    .predict-sub {
+      font-size: clamp(5px, 0.9vw, 7px);
+      color: #555;
+      letter-spacing: 1px;
+    }
 
     /* Divider */
     .divider { height: 1px; background: linear-gradient(90deg, transparent, #2a2a2a, transparent); margin: 0 0 1.5rem; }
@@ -154,8 +182,6 @@
 
     /* Refresh button */
     #refreshBtn {
-      position: relative;
-      z-index: 1000;
       display: block;
       width: 100%;
       padding: 16px 24px;
@@ -167,22 +193,22 @@
       border: none;
       cursor: pointer;
       letter-spacing: 2px;
-      box-shadow: 0 6px 0 #996600, 0 8px 16px rgba(0,0,0,0.5);
-      transition: transform 0.1s, box-shadow 0.1s;
+      box-shadow: 0 6px 0 #996600, 0 8px 20px rgba(0,0,0,0.6);
+      transition: transform 0.08s, box-shadow 0.08s;
     }
-    #refreshBtn:hover { background: #ffe066; }
+    #refreshBtn:hover { background: #ffe566; }
     #refreshBtn:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px 0 #996600;
+      transform: translateY(5px);
+      box-shadow: 0 1px 0 #996600;
     }
     #refreshBtn:disabled {
-      background: #444;
-      color: #888;
-      box-shadow: 0 2px 0 #222;
+      background: #333;
+      color: #666;
+      box-shadow: 0 2px 0 #111;
       cursor: not-allowed;
     }
 
-    /* Live indicator */
+    /* Live dot */
     .live-dot {
       display: inline-block;
       width: 6px; height: 6px;
@@ -232,6 +258,12 @@
       </div>
     </div>
 
+    <div class="predict-box">
+      <div class="predict-label">OVERTAKE DAY</div>
+      <div class="predict-date" id="predictDate">—</div>
+      <div class="predict-sub" id="predictSub">LOADING DATA...</div>
+    </div>
+
     <div class="divider"></div>
 
     <div class="status">
@@ -245,26 +277,85 @@
 
   <script>
     const SHEET_ID = '1j_Z8JuukkskQlfgsIzZgiX_XoSGu_rzNuCGLu_asZuo';
-    const CSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
-    const PROXIES  = [
-      'https://corsproxy.io/?url=' + encodeURIComponent(CSV_URL),
+
+    // Google's own gviz API — works with CORS for publicly shared sheets
+    const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+
+    // Fallback proxies if gviz is blocked
+    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+    const PROXIES = [
+      'https://corsproxy.io/?' + encodeURIComponent(CSV_URL),
       'https://api.allorigins.win/raw?url=' + encodeURIComponent(CSV_URL),
     ];
 
-    async function fetchWithTimeout(url, ms = 8000) {
+    /* ── helpers ── */
+    async function fetchWithTimeout(url, ms = 9000) {
       const ctrl = new AbortController();
       const tid  = setTimeout(() => ctrl.abort(), ms);
-      try {
-        const r = await fetch(url, { signal: ctrl.signal });
-        clearTimeout(tid);
-        return r;
-      } catch (e) {
-        clearTimeout(tid);
-        throw e;
-      }
+      try   { const r = await fetch(url, { signal: ctrl.signal }); clearTimeout(tid); return r; }
+      catch (e) { clearTimeout(tid); throw e; }
     }
 
-    // Minimal CSV parser that handles quoted fields
+    function parseNum(s) {
+      if (!s) return null;
+      s = String(s);
+      if (s.includes('\u2014') || s.trim() === '-' || s.trim() === '') return null;
+      const n = parseInt(s.replace(/[^0-9-]/g, ''));
+      return isNaN(n) ? null : n;
+    }
+
+    function fmt(n) { return Math.abs(Math.round(n)).toLocaleString(); }
+
+    function addDays(date, days) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + Math.ceil(days));
+      return d;
+    }
+
+    function fmtDate(d) {
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+    }
+
+    /* ── gviz JSON parser (Google's own API, best CORS support) ── */
+    async function fetchFromGviz() {
+      const r = await fetchWithTimeout(GVIZ_URL);
+      if (!r.ok) throw new Error('gviz HTTP ' + r.status);
+      const text = await r.text();
+
+      // Strip JSONP wrapper: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
+      const match = text.match(/setResponse\((\{[\s\S]+\})\)/);
+      if (!match) throw new Error('gviz: unexpected response format');
+      const data = JSON.parse(match[1]);
+      if (data.status !== 'ok') throw new Error('gviz status: ' + data.status);
+
+      const rows = [];
+      for (const row of data.table.rows) {
+        if (!row || !row.c) continue;
+        const v = (i) => (row.c[i] && row.c[i].v !== undefined) ? row.c[i].v : null;
+        const f = (i) => (row.c[i] && row.c[i].f !== undefined) ? row.c[i].f : v(i);
+
+        // Numbers come back as JS numbers from gviz — perfect
+        const chris = typeof v(2) === 'number' ? v(2) : parseNum(f(2));
+        const ruben = typeof v(4) === 'number' ? v(4) : parseNum(f(4));
+        if (!chris || !ruben) continue;
+
+        const num = (i) => typeof v(i) === 'number' ? v(i) : parseNum(f(i));
+
+        rows.push({
+          date:        String(f(0) || v(0) || ''),
+          hour:        String(v(1) || ''),
+          chris,
+          chris_daily: num(3),
+          ruben,
+          ruben_daily: num(5),
+          gap:         num(6),
+          growth_diff: num(7),
+        });
+      }
+      return rows;
+    }
+
+    /* ── CSV parser fallback ── */
     function parseCSV(text) {
       return text.trim().split('\n').map(line => {
         const fields = [];
@@ -279,22 +370,11 @@
       });
     }
 
-    function parseNum(s) {
-      if (!s || s.includes('\u2014') || s === '-' || s === '') return null;
-      const n = parseInt(s.replace(/[^0-9-]/g, ''));
-      return isNaN(n) ? null : n;
-    }
-
-    function fmt(n) { return Math.abs(Math.round(n)).toLocaleString(); }
-
-    function processRows(rows) {
-      // rows[0] = header
+    function processCSVRows(rows) {
       const data = [];
       for (const row of rows.slice(1)) {
-        if (!row[2] || row[2].includes('\u2014')) continue;
         const chris = parseNum(row[2]);
         const ruben = parseNum(row[4]);
-        const gap   = parseNum(row[6]);
         if (!chris || !ruben) continue;
         data.push({
           date:        row[0] || '',
@@ -303,20 +383,62 @@
           chris_daily: parseNum(row[3]),
           ruben,
           ruben_daily: parseNum(row[5]),
-          gap:         gap,
+          gap:         parseNum(row[6]),
           growth_diff: parseNum(row[7]),
         });
       }
       return data;
     }
 
+    /* ── prediction ── */
+    function calcOvertake(rows, currentGap) {
+      // growth_diff = ruben_daily - chris_daily
+      // positive = Ruben gained more = gap closing = GOOD
+      const diffs = rows
+        .map(r => r.growth_diff)
+        .filter(d => d !== null && d !== undefined);
+
+      if (diffs.length === 0) return null;
+
+      const avg = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+
+      if (avg <= 0) {
+        return { type: 'losing', avg };
+      }
+
+      const days = currentGap / avg;
+      return { type: 'winning', days, avg, date: addDays(new Date(), days) };
+    }
+
+    function renderPrediction(rows, gap) {
+      const p = calcOvertake(rows, gap);
+      const dateEl = document.getElementById('predictDate');
+      const subEl  = document.getElementById('predictSub');
+
+      if (!p) {
+        dateEl.textContent = '?';
+        dateEl.className = 'predict-date bad';
+        subEl.textContent = 'NOT ENOUGH DATA YET';
+        return;
+      }
+
+      if (p.type === 'losing') {
+        dateEl.textContent = 'NEVER AT THIS PACE';
+        dateEl.className = 'predict-date bad';
+        subEl.textContent = `AVG ${fmt(Math.abs(p.avg))} FOLLOWERS/DAY BEHIND`;
+      } else {
+        dateEl.textContent = fmtDate(p.date);
+        dateEl.className = 'predict-date';
+        subEl.textContent = `IN ${Math.ceil(p.days)} DAYS  ·  AVG +${fmt(p.avg)}/DAY ADVANTAGE`;
+      }
+    }
+
+    /* ── render ── */
     function renderUI(rows) {
       if (!rows.length) return;
-      const startGap = rows[0].gap;
-      const d = rows[rows.length - 1];
+      const d = rows[rows.length - 1]; // latest row
       const { chris, ruben, gap, date, hour, chris_daily, ruben_daily, growth_diff } = d;
 
-      // pct = gap as share of Chris's followers → true relative distance to parity
       const pct = Math.max(0, (gap / chris) * 100);
 
       document.getElementById('chrisCount').textContent = fmt(chris);
@@ -336,9 +458,8 @@
       const bar = document.getElementById('barFill');
       bar.style.width = pct + '%';
       bar.className = 'bar-fill';
-      // thresholds relative to Chris's follower count
-      if      (pct <= 15) bar.classList.add('danger');   // very close, flicker red
-      else if (pct <= 45) bar.classList.add('warning');  // closing in, yellow
+      if      (pct <= 15) bar.classList.add('danger');
+      else if (pct <= 45) bar.classList.add('warning');
 
       if (gap <= 0) {
         bar.style.width = '0%';
@@ -356,39 +477,47 @@
         const main = document.getElementById('statusMain');
         const sub  = document.getElementById('statusSub');
         main.className = 'status-main';
-
         if (pct > 45) {
           main.textContent = 'FIGHT!';
-          sub.textContent = growth_diff < 0
-            ? 'CHRIS IS PULLING AHEAD TODAY...'
-            : 'RUBEN IS CLOSING THE GAP TODAY!';
+          sub.textContent  = growth_diff < 0 ? 'CHRIS IS PULLING AHEAD TODAY...' : 'RUBEN IS CLOSING THE GAP!';
         } else if (pct > 15) {
           main.textContent = 'CLOSING IN!';
-          sub.textContent = 'RUBEN IS GAINING GROUND!';
+          sub.textContent  = 'RUBEN IS GAINING GROUND!';
         } else {
           main.textContent = 'ALMOST THERE!';
-          sub.textContent = "CHRIS IS ON THE ROPES!";
+          sub.textContent  = 'CHRIS IS ON THE ROPES!';
         }
       }
+
+      renderPrediction(rows, gap);
 
       document.getElementById('footer').innerHTML =
         `<span class="live-dot"></span>LIVE &nbsp;&nbsp; LAST UPDATE: ${date}  ${hour}`;
     }
 
+    /* ── fetch ── */
     async function loadLive() {
-      // Try each proxy in order until one works
-      for (const proxyUrl of PROXIES) {
+      // 1. Try Google's gviz API first (best CORS support, no third-party)
+      try {
+        const rows = await fetchFromGviz();
+        if (rows.length) { renderUI(rows); return; }
+      } catch (e) {
+        console.warn('gviz failed:', e.message);
+      }
+
+      // 2. Try CSV proxies as fallback
+      for (const url of PROXIES) {
         try {
-          const r = await fetchWithTimeout(proxyUrl);
+          const r = await fetchWithTimeout(url);
           if (!r.ok) continue;
-          const csv  = await r.text();
-          const rows = processRows(parseCSV(csv));
+          const rows = processCSVRows(parseCSV(await r.text()));
           if (rows.length) { renderUI(rows); return; }
         } catch (e) {
-          console.warn('Proxy failed:', proxyUrl, e.message);
+          console.warn('Proxy failed:', e.message);
         }
       }
-      // Fallback to bundled data.json
+
+      // 3. Last resort: bundled data.json
       try {
         const r = await fetchWithTimeout('./data.json?t=' + Date.now());
         const d = await r.json();
@@ -404,8 +533,8 @@
       btn.disabled = true;
       btn.textContent = '⏳ LOADING...';
       loadLive().finally(() => {
-        btn.textContent = '▶ PRESS START TO WIN ◀';
         btn.disabled = false;
+        btn.textContent = '▶ PRESS START TO WIN ◀';
       });
     }
 
