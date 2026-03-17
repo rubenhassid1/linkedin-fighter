@@ -246,7 +246,23 @@
   <script>
     const SHEET_ID = '1j_Z8JuukkskQlfgsIzZgiX_XoSGu_rzNuCGLu_asZuo';
     const CSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
-    const PROXY    = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(CSV_URL);
+    const PROXIES  = [
+      'https://corsproxy.io/?url=' + encodeURIComponent(CSV_URL),
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent(CSV_URL),
+    ];
+
+    async function fetchWithTimeout(url, ms = 8000) {
+      const ctrl = new AbortController();
+      const tid  = setTimeout(() => ctrl.abort(), ms);
+      try {
+        const r = await fetch(url, { signal: ctrl.signal });
+        clearTimeout(tid);
+        return r;
+      } catch (e) {
+        clearTimeout(tid);
+        throw e;
+      }
+    }
 
     // Minimal CSV parser that handles quoted fields
     function parseCSV(text) {
@@ -359,23 +375,25 @@
         `<span class="live-dot"></span>LIVE &nbsp;&nbsp; LAST UPDATE: ${date}  ${hour}`;
     }
 
-    async function loadLive() { // returns promise so manualRefresh can await it
-      try {
-        const r = await fetch(PROXY);
-        if (!r.ok) throw new Error('proxy ' + r.status);
-        const csv = await r.text();
-        const rows = processRows(parseCSV(csv));
-        if (rows.length) { renderUI(rows); return; }
-      } catch (e) {
-        console.warn('Live fetch failed, falling back to data.json', e);
+    async function loadLive() {
+      // Try each proxy in order until one works
+      for (const proxyUrl of PROXIES) {
+        try {
+          const r = await fetchWithTimeout(proxyUrl);
+          if (!r.ok) continue;
+          const csv  = await r.text();
+          const rows = processRows(parseCSV(csv));
+          if (rows.length) { renderUI(rows); return; }
+        } catch (e) {
+          console.warn('Proxy failed:', proxyUrl, e.message);
+        }
       }
-      // Fallback to static data.json
+      // Fallback to bundled data.json
       try {
-        const r = await fetch('./data.json?t=' + Date.now());
+        const r = await fetchWithTimeout('./data.json?t=' + Date.now());
         const d = await r.json();
-        // Convert data.json format to rows array
         renderUI(d.history || [d.latest]);
-      } catch (e2) {
+      } catch (e) {
         document.getElementById('statusMain').textContent = 'ERROR';
         document.getElementById('statusSub').textContent = 'COULD NOT LOAD DATA';
       }
