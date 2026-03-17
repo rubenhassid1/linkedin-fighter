@@ -161,6 +161,13 @@
       margin-bottom: 1.5rem;
     }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    button.press-start {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    button.press-start:active { transform: scale(0.95); }
 
     /* Live indicator */
     .live-dot {
@@ -219,7 +226,7 @@
       <div class="status-sub" id="statusSub"></div>
     </div>
 
-    <div class="press-start">▶ PRESS START TO WIN ◀</div>
+    <button class="press-start" id="refreshBtn" onclick="manualRefresh()">▶ PRESS START TO WIN ◀</button>
     <div class="footer" id="footer"></div>
   </div>
 
@@ -339,7 +346,7 @@
         `<span class="live-dot"></span>LIVE &nbsp;&nbsp; LAST UPDATE: ${date}  ${hour}`;
     }
 
-    async function loadLive() {
+    async function loadLive() { // returns promise so manualRefresh can await it
       try {
         const r = await fetch(PROXY);
         if (!r.ok) throw new Error('proxy ' + r.status);
@@ -361,8 +368,18 @@
       }
     }
 
+    function manualRefresh() {
+      const btn = document.getElementById('refreshBtn');
+      btn.textContent = '⏳ LOADING...';
+      btn.style.animationName = 'none';
+      loadLive().finally(() => {
+        btn.textContent = '▶ PRESS START TO WIN ◀';
+        btn.style.animationName = '';
+      });
+    }
+
     loadLive();
-    setInterval(loadLive, 10 * 60 * 1000); // refresh every 10 min
+    setInterval(loadLive, 10 * 60 * 1000);
   </script>
 </body>
 </html>
