@@ -341,9 +341,12 @@
 
         const num = (i) => typeof v(i) === 'number' ? v(i) : parseNum(f(i));
 
+        // f(0) is the formatted date string (e.g. "18/03/2026"); v(0) may be a raw gviz Date object
+        const rawDate = f(0) || '';
+        const dateStr = (typeof rawDate === 'string' && rawDate && !rawDate.startsWith('Date(')) ? rawDate : '';
         rows.push({
-          date:        String(f(0) || v(0) || ''),
-          hour:        String(v(1) || ''),
+          date:        dateStr,
+          hour:        String(f(1) || v(1) || ''),
           chris,
           chris_daily: num(3),
           ruben,
@@ -393,14 +396,15 @@
     /* ── prediction ── */
     function calcOvertake(rows, currentGap) {
       // growth_diff = ruben_daily - chris_daily
-      // positive = Ruben gained more = gap closing = GOOD
-      const diffs = rows
+      // Use the latest available growth_diff (today's numbers), not a historical average
+      const validDiffs = rows
         .map(r => r.growth_diff)
         .filter(d => d !== null && d !== undefined);
 
-      if (diffs.length === 0) return null;
+      if (validDiffs.length === 0) return null;
 
-      const avg = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+      // Use latest non-null growth_diff — this matches what the user sees (+800 - +274 = +526)
+      const avg = validDiffs[validDiffs.length - 1];
 
       if (avg <= 0) {
         return { type: 'losing', avg };
