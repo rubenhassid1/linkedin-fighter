@@ -52,17 +52,15 @@
       background: radial-gradient(ellipse at 50% 90%, #110a1e 0%, #050008 70%);
       border: 1px solid #1a1a1a;
       border-bottom: 2px solid #ffcc0055;
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: end;
-      padding: 0 2rem;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 3rem;
       height: clamp(160px, 22vw, 210px);
       overflow: hidden;
     }
     .arena::after { content: ''; position: absolute; bottom: 0; left: 10%; right: 10%; height: 2px; background: radial-gradient(ellipse, #ffcc0033, transparent); }
     .fighter-side { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; }
-    .fighter-side.left { justify-self: end; padding-right: 1rem; }
-    .fighter-side.right { justify-self: start; padding-left: 1rem; }
     .fighter-side img { width: clamp(80px, 14vw, 120px); height: auto; image-rendering: pixelated; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); transition: filter 0.3s; }
     .fighter-side.left img { transform: scaleX(-1); }
     .fighter-side.hit img { filter: brightness(3) drop-shadow(0 0 20px #fff); }
@@ -71,9 +69,17 @@
     .fighter-label .count { font-size: clamp(9px, 1.5vw, 12px); color: #fff; }
     .fighter-label .daily { font-size: clamp(5px, 0.8vw, 7px); color: #666; }
     .fighter-label .daily.up { color: #ffcc00; }
-    .arena-gap { align-self: center; text-align: center; z-index: 3; }
-    .arena-gap-num { font-size: clamp(14px, 2.8vw, 22px); color: #ffcc00; }
-    .arena-gap-lbl { font-size: clamp(4px, 0.6vw, 5px); color: #444; letter-spacing: 1px; margin-top: 2px; }
+    /* Gap bar sits BELOW the arena, not inside it */
+    .gap-row {
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+      border-top: none;
+      padding: 6px 0;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .gap-row-num { font-size: clamp(12px, 2.2vw, 18px); color: #ffcc00; display: inline; }
+    .gap-row-lbl { font-size: clamp(4px, 0.6vw, 5px); color: #444; letter-spacing: 1px; margin-left: 8px; }
 
     .hit-effect { position: absolute; top: 35%; left: 50%; transform: translate(-50%,-50%); font-size: clamp(26px, 5vw, 44px); color: #ffcc00; text-shadow: 0 0 30px #ffcc00, 0 0 60px #996600; z-index: 10; opacity: 0; pointer-events: none; }
     .hit-effect.show { animation: hit-pop 1s ease-out forwards; }
@@ -131,16 +137,18 @@
     /* History table */
     .history-toggle { display: block; width: 100%; margin-top: 0.5rem; padding: 6px; font-family: 'Press Start 2P', monospace; font-size: clamp(5px, 0.8vw, 7px); color: #555; background: #060606; border: 1px solid #1a1a1a; cursor: pointer; text-align: center; letter-spacing: 2px; }
     .history-toggle:hover { color: #ffcc00; border-color: #333; }
-    .history-wrap { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
-    .history-wrap.open { max-height: 600px; overflow-y: auto; }
-    .history-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
-    .history-table th, .history-table td { padding: 4px 6px; font-size: clamp(4px, 0.6vw, 5px); text-align: right; border-bottom: 1px solid #111; }
-    .history-table th { color: #444; letter-spacing: 1px; position: sticky; top: 0; background: #060606; }
-    .history-table td { color: #666; }
-    .history-table td.date-col { text-align: left; color: #555; }
-    .history-table td.win { color: #ffcc00; }
-    .history-table td.lose { color: #333; }
-    .history-table tr:hover td { background: #0a0a0a; }
+    .history-wrap { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; border: 1px solid #1a1a1a; border-top: none; }
+    .history-wrap.open { max-height: 500px; overflow-y: auto; }
+    .history-table { width: auto; margin: 0 auto; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    .history-table th, .history-table td { padding: 3px 8px; font-size: clamp(5px, 0.75vw, 7px); text-align: right; white-space: nowrap; }
+    .history-table th { color: #444; letter-spacing: 1px; position: sticky; top: 0; background: #060606; border-bottom: 1px solid #222; padding-bottom: 5px; }
+    .history-table td { color: #555; border-bottom: 1px solid #0a0a0a; }
+    .history-table td.date-col { text-align: left; color: #444; }
+    .history-table td.win { color: #ffcc00; font-weight: bold; }
+    .history-table td.lose { color: #2a2a2a; }
+    .history-table tr:hover td { color: #888; }
+    .history-table tr:hover td.win { color: #ffcc00; }
+    .history-table tr:hover td.lose { color: #444; }
   </style>
 </head>
 <body>
@@ -170,10 +178,6 @@
         </div>
         <img src="https://www.muraldecal.com/en/img/arc244-png/folder/products-detalle-png/stickers-street-fighter-ryu-pixel-16-bits.png" alt="RYU">
       </div>
-      <div class="arena-gap">
-        <div class="arena-gap-num" id="gapNum">—</div>
-        <div class="arena-gap-lbl">GAP</div>
-      </div>
       <div class="fighter-side right" id="fighterRuben">
         <div class="fighter-label">
           <div class="count" id="rubenCount">—</div>
@@ -182,6 +186,10 @@
         <img src="https://www.muraldecal.com/en/img/arc243-png/folder/products-detalle-png/stickers-street-fighter-ken-pixel-16-bits.png" alt="KEN">
       </div>
       <div class="hit-effect" id="hitEffect"></div>
+    </div>
+    <div class="gap-row">
+      <span class="gap-row-num" id="gapNum">—</span>
+      <span class="gap-row-lbl">GAP</span>
     </div>
 
     <div class="bottom-grid">
