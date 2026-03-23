@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LINKEDIN FIGHTER II</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -331,29 +332,22 @@
     }
 
     /* ===== GAP HISTORY SPARKLINE ===== */
-    .sparkline-box {
+    .chart-box {
       border: 1px solid #222;
       padding: 12px 14px;
       margin-bottom: 1rem;
       text-align: center;
     }
-    .sparkline-title {
+    .chart-title {
       font-size: clamp(5px, 0.9vw, 7px);
       color: #555;
       letter-spacing: 2px;
       margin-bottom: 10px;
     }
-    .sparkline-canvas {
+    .chart-wrap {
+      position: relative;
       width: 100%;
-      height: 60px;
-    }
-    .sparkline-stats {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 8px;
-      font-size: clamp(5px, 0.85vw, 6px);
-      color: #444;
-      letter-spacing: 1px;
+      height: 180px;
     }
 
     /* ===== STATUS ===== */
@@ -489,13 +483,11 @@
       <span class="combo-label" id="comboLabel"></span>
     </div>
 
-    <!-- Gap history sparkline -->
-    <div class="sparkline-box">
-      <div class="sparkline-title">GAP HISTORY</div>
-      <canvas class="sparkline-canvas" id="sparkline"></canvas>
-      <div class="sparkline-stats">
-        <span id="sparkStart"></span>
-        <span id="sparkEnd"></span>
+    <!-- Gap history chart -->
+    <div class="chart-box">
+      <div class="chart-title">GAP HISTORY</div>
+      <div class="chart-wrap">
+        <canvas id="gapChart"></canvas>
       </div>
     </div>
 
@@ -647,59 +639,84 @@
       return streak;
     }
 
-    /* ── sparkline: draw gap history on canvas ── */
-    function drawSparkline(rows) {
-      const canvas = document.getElementById('sparkline');
-      const ctx = canvas.getContext('2d');
-      const gaps = rows.map(r => r.gap).filter(g => g !== null && g !== undefined);
-      if (gaps.length < 2) return;
+    /* ── gap history chart (Chart.js) ── */
+    let gapChartInstance = null;
+    function renderGapChart(rows) {
+      const data = rows
+        .filter(r => r.gap !== null && r.gap !== undefined && r.date)
+        .map(r => ({ x: r.date, y: r.gap }));
+      if (data.length < 2) return;
 
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-      const W = rect.width, H = rect.height;
+      const canvas = document.getElementById('gapChart');
+      if (gapChartInstance) { gapChartInstance.destroy(); gapChartInstance = null; }
 
-      const maxG = Math.max(...gaps);
-      const minG = Math.min(...gaps);
-      const range = maxG - minG || 1;
-      const padY = 6;
+      const closing = data[data.length - 1].y < data[0].y;
+      const lineColor = closing ? '#44ff44' : '#ff4444';
+      const fillColor = closing ? 'rgba(68,255,68,0.08)' : 'rgba(255,68,68,0.08)';
 
-      // Draw line
-      ctx.beginPath();
-      ctx.strokeStyle = '#ffcc00';
-      ctx.lineWidth = 2;
-      ctx.lineJoin = 'round';
-      for (let i = 0; i < gaps.length; i++) {
-        const x = (i / (gaps.length - 1)) * W;
-        const y = padY + ((gaps[i] - minG) / range) * (H - padY * 2);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      // Fill under the line
-      ctx.lineTo(W, H);
-      ctx.lineTo(0, H);
-      ctx.closePath();
-      const grad = ctx.createLinearGradient(0, 0, 0, H);
-      grad.addColorStop(0, 'rgba(255,204,0,0.15)');
-      grad.addColorStop(1, 'rgba(255,204,0,0)');
-      ctx.fillStyle = grad;
-      ctx.fill();
-
-      // End dot
-      const lastX = W;
-      const lastY = padY + ((gaps[gaps.length-1] - minG) / range) * (H - padY * 2);
-      ctx.beginPath();
-      ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
-      ctx.fillStyle = gaps[gaps.length-1] < gaps[0] ? '#44ff44' : '#ff4444';
-      ctx.fill();
-
-      // Stats
-      document.getElementById('sparkStart').textContent = `START: ${fmt(gaps[0])} GAP`;
-      document.getElementById('sparkEnd').textContent = `NOW: ${fmt(gaps[gaps.length-1])} GAP`;
+      gapChartInstance = new Chart(canvas, {
+        type: 'line',
+        data: {
+          datasets: [{
+            data: data,
+            borderColor: lineColor,
+            backgroundColor: fillColor,
+            borderWidth: 2,
+            pointRadius: 0,
+            pointHitRadius: 12,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#ffcc00',
+            pointHoverBorderColor: '#fff',
+            fill: true,
+            tension: 0.3,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'nearest', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#111',
+              borderColor: '#ffcc00',
+              borderWidth: 1,
+              titleFont: { family: "'Press Start 2P', monospace", size: 7 },
+              bodyFont: { family: "'Press Start 2P', monospace", size: 9 },
+              titleColor: '#888',
+              bodyColor: '#ffcc00',
+              padding: 10,
+              displayColors: false,
+              callbacks: {
+                title: (items) => items[0]?.raw?.x || '',
+                label: (item) => 'GAP: ' + fmt(item.raw.y),
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'category',
+              ticks: {
+                color: '#333',
+                font: { family: "'Press Start 2P', monospace", size: 6 },
+                maxTicksLimit: 6,
+                maxRotation: 0,
+              },
+              grid: { color: '#1a1a1a' },
+              border: { color: '#333' },
+            },
+            y: {
+              ticks: {
+                color: '#444',
+                font: { family: "'Press Start 2P', monospace", size: 7 },
+                callback: (v) => fmt(v),
+              },
+              grid: { color: '#1a1a1a' },
+              border: { color: '#333' },
+            }
+          }
+        }
+      });
     }
 
     /* ── trigger hit animation ── */
@@ -758,10 +775,10 @@
         el.className = 'fighter-daily ' + (ruben_daily > 0 ? 'up' : ruben_daily < 0 ? 'down' : 'flat');
       }
 
-      // HP bars — Chris HP = gap as % of initial gap (first row), Ruben HP = inverse
-      const firstGap = rows[0].gap || gap || 1;
-      const chrisPct = Math.min(100, Math.max(0, (gap / firstGap) * 100));
-      const rubenPct = 100 - chrisPct;
+      // HP bars — Chris HP depletes as Ruben catches up (gap / chris = how much lead Chris has left)
+      // Ruben HP = his followers as % of Chris's (how close he is to overtaking)
+      const chrisPct = Math.min(100, Math.max(0, (gap / chris) * 100));
+      const rubenPct = Math.min(100, Math.max(0, (ruben / chris) * 100));
       document.getElementById('chrisHp').style.width = chrisPct + '%';
       document.getElementById('rubenHp').style.width = rubenPct + '%';
       if (chrisPct < 20) document.getElementById('chrisHp').classList.add('critical');
@@ -830,8 +847,8 @@
         comboBar.className = 'combo-bar';
       }
 
-      // Sparkline
-      drawSparkline(rows);
+      // Gap chart
+      renderGapChart(rows);
 
       // Prediction
       const p = calcOvertake(rows, gap);
