@@ -8,7 +8,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       min-height: 100vh;
       display: flex;
@@ -18,8 +17,6 @@
       color: #fff;
       background: #000;
     }
-
-    /* CRT scanlines */
     body::before {
       content: '';
       position: fixed;
@@ -28,338 +25,122 @@
       pointer-events: none;
       z-index: 100;
     }
+    .page { position: relative; z-index: 2; width: min(98vw, 1100px); padding: 0.8rem 1rem; }
 
-    .page {
-      position: relative;
-      z-index: 2;
-      width: min(98vw, 1100px);
-      padding: 1rem;
-    }
+    /* Title */
+    .title { text-align: center; margin-bottom: 0.5rem; }
+    .title-main { font-size: clamp(16px, 3.2vw, 28px); color: #ffcc00; text-shadow: 2px 2px 0 #996600, 4px 4px 0 #663300; letter-spacing: 3px; }
+    .title-sub { display: block; font-size: clamp(5px, 0.8vw, 6px); color: #664400; letter-spacing: 4px; margin-top: 3px; }
 
-    /* ===== TITLE ===== */
-    .title { text-align: center; margin-bottom: 0.8rem; }
-    .title-main {
-      font-size: clamp(18px, 3.5vw, 32px);
-      color: #ffcc00;
-      text-shadow: 2px 2px 0 #996600, 4px 4px 0 #663300;
-      letter-spacing: 3px;
-    }
-    .title-sub {
-      display: block;
-      font-size: clamp(5px, 1vw, 7px);
-      color: #664400;
-      letter-spacing: 4px;
-      margin-top: 4px;
-    }
-
-    /* ===== HUD (health bars) ===== */
-    .hud {
-      display: grid;
-      grid-template-columns: 1fr 40px 1fr;
-      align-items: end;
-      margin-bottom: 0.5rem;
-      gap: 6px;
-    }
-    .hud-side { display: flex; flex-direction: column; gap: 3px; }
-    .hud-name { font-size: clamp(7px, 1.2vw, 9px); letter-spacing: 2px; color: #888; }
+    /* HUD */
+    .hud { display: grid; grid-template-columns: 1fr 36px 1fr; align-items: end; margin-bottom: 0.3rem; gap: 4px; }
+    .hud-side { display: flex; flex-direction: column; gap: 2px; }
+    .hud-name { font-size: clamp(6px, 1vw, 8px); letter-spacing: 2px; color: #666; }
     .hud-name.right { text-align: right; }
-    .hp-bar {
-      height: 22px;
-      border: 2px solid #ffcc00;
-      background: #111;
-      position: relative;
-      overflow: hidden;
-    }
-    .hp-bar::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(90deg, transparent, transparent calc(10% - 1px), rgba(0,0,0,0.35) calc(10% - 1px), rgba(0,0,0,0.35) 10%);
-      z-index: 2;
-      pointer-events: none;
-    }
-    .hp-fill {
-      position: absolute;
-      top: 0; bottom: 0;
-      transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 1;
-    }
-    .hp-fill.chris-hp {
-      right: 0;
-      background: linear-gradient(270deg, #ffcc00 0%, #cc9900 100%);
-    }
-    .hp-fill.ruben-hp {
-      left: 0;
-      background: linear-gradient(90deg, #cc9900 0%, #ffcc00 100%);
-    }
+    .hp-bar { height: 18px; border: 2px solid #ffcc00; background: #111; position: relative; overflow: hidden; }
+    .hp-bar::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent, transparent calc(10% - 1px), rgba(0,0,0,0.35) calc(10% - 1px), rgba(0,0,0,0.35) 10%); z-index: 2; pointer-events: none; }
+    .hp-fill { position: absolute; top: 0; bottom: 0; transition: width 1.5s cubic-bezier(0.4,0,0.2,1); z-index: 1; }
+    .hp-fill.chris-hp { right: 0; background: linear-gradient(270deg, #ffcc00, #cc9900); }
+    .hp-fill.ruben-hp { left: 0; background: linear-gradient(90deg, #cc9900, #ffcc00); }
     .hp-fill.critical { animation: hp-flash 0.3s steps(2) infinite; }
     @keyframes hp-flash { 0%,100%{opacity:1} 50%{opacity:.4} }
-    .hud-vs {
-      text-align: center;
-      font-size: clamp(10px, 2vw, 16px);
-      color: #ffcc00;
-      align-self: center;
-    }
+    .hud-vs { text-align: center; font-size: clamp(9px, 1.6vw, 13px); color: #ffcc00; align-self: center; }
 
-    /* ===== ARENA ===== */
+    /* Arena */
     .arena {
       position: relative;
       background: radial-gradient(ellipse at 50% 90%, #110a1e 0%, #050008 70%);
       border: 1px solid #1a1a1a;
-      border-bottom: 3px solid #ffcc0066;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      gap: 0;
-      padding: 0 1rem;
-      height: clamp(180px, 28vw, 240px);
-      overflow: hidden;
-    }
-    .arena::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 10%; right: 10%;
-      height: 3px;
-      background: radial-gradient(ellipse, #ffcc0044, transparent);
-    }
-    .fighter {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .fighter img {
-      width: clamp(90px, 16vw, 140px);
-      height: auto;
-      image-rendering: pixelated;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
-      transition: filter 0.3s;
-    }
-    /* Flip both so they face each other */
-    .fighter.chris img { transform: scaleX(-1); }
-    .fighter.hit img { filter: brightness(3) drop-shadow(0 0 20px #fff); }
-    .fighter.hurt img { filter: brightness(0.3) sepia(0.5); }
-    .fighter-info {
-      text-align: center;
-      margin-bottom: 4px;
-    }
-    .fighter-count {
-      font-size: clamp(10px, 1.8vw, 14px);
-      color: #fff;
-    }
-    .fighter-daily {
-      font-size: clamp(6px, 1vw, 8px);
-      color: #666;
-    }
-    .fighter-daily.up { color: #ffcc00; }
-    .fighter-daily.down { color: #555; }
-
-    /* Hit effect */
-    .hit-effect {
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: clamp(28px, 6vw, 52px);
-      color: #ffcc00;
-      text-shadow: 0 0 40px #ffcc00, 0 0 80px #996600;
-      z-index: 10;
-      opacity: 0;
-      pointer-events: none;
-    }
-    .hit-effect.show { animation: hit-pop 1s ease-out forwards; }
-    @keyframes hit-pop {
-      0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
-      15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
-      30%  { transform: translate(-50%, -50%) scale(1); }
-      70%  { opacity: 1; }
-      100% { opacity: 0; transform: translate(-50%, -55%) scale(1.1); }
-    }
-    .shake { animation: screen-shake 0.35s ease-out; }
-    @keyframes screen-shake {
-      0%  { transform: translate(0); }
-      25% { transform: translate(-5px, 2px); }
-      50% { transform: translate(4px, -3px); }
-      75% { transform: translate(-2px, 1px); }
-      100%{ transform: translate(0); }
-    }
-
-    /* ===== STATS ROW (below arena) ===== */
-    .stats-row {
+      border-bottom: 2px solid #ffcc0055;
       display: grid;
       grid-template-columns: 1fr auto 1fr;
-      background: #0a0a0a;
-      border: 1px solid #1a1a1a;
-      border-top: none;
-      padding: 8px 14px;
-      margin-bottom: 0.8rem;
-      align-items: center;
+      align-items: end;
+      padding: 0 2rem;
+      height: clamp(160px, 22vw, 210px);
+      overflow: hidden;
     }
-    .stats-row .left { text-align: left; }
-    .stats-row .right { text-align: right; }
-    .stat-label { font-size: clamp(4px, 0.7vw, 5px); color: #444; letter-spacing: 1px; }
-    .stat-val { font-size: clamp(8px, 1.4vw, 11px); color: #ccc; }
-    .stat-daily { font-size: clamp(5px, 0.9vw, 7px); color: #666; margin-top: 2px; }
-    .stat-daily.up { color: #ffcc00; }
-    .stat-daily.down { color: #555; }
-    .gap-center { text-align: center; }
-    .gap-num { font-size: clamp(12px, 2.5vw, 18px); color: #ffcc00; }
-    .gap-lbl { font-size: clamp(4px, 0.7vw, 5px); color: #444; letter-spacing: 1px; margin-top: 2px; }
+    .arena::after { content: ''; position: absolute; bottom: 0; left: 10%; right: 10%; height: 2px; background: radial-gradient(ellipse, #ffcc0033, transparent); }
+    .fighter-side { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; }
+    .fighter-side.left { justify-self: end; padding-right: 1rem; }
+    .fighter-side.right { justify-self: start; padding-left: 1rem; }
+    .fighter-side img { width: clamp(80px, 14vw, 120px); height: auto; image-rendering: pixelated; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); transition: filter 0.3s; }
+    .fighter-side.left img { transform: scaleX(-1); }
+    .fighter-side.hit img { filter: brightness(3) drop-shadow(0 0 20px #fff); }
+    .fighter-side.hurt img { filter: brightness(0.3) sepia(0.5); }
+    .fighter-label { text-align: center; margin-bottom: 2px; }
+    .fighter-label .count { font-size: clamp(9px, 1.5vw, 12px); color: #fff; }
+    .fighter-label .daily { font-size: clamp(5px, 0.8vw, 7px); color: #666; }
+    .fighter-label .daily.up { color: #ffcc00; }
+    .arena-gap { align-self: center; text-align: center; z-index: 3; }
+    .arena-gap-num { font-size: clamp(14px, 2.8vw, 22px); color: #ffcc00; }
+    .arena-gap-lbl { font-size: clamp(4px, 0.6vw, 5px); color: #444; letter-spacing: 1px; margin-top: 2px; }
 
-    /* ===== TWO-COLUMN BOTTOM ===== */
-    .bottom-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.8rem;
-    }
-    @media (max-width: 700px) {
-      .bottom-grid { grid-template-columns: 1fr; }
-    }
+    .hit-effect { position: absolute; top: 35%; left: 50%; transform: translate(-50%,-50%); font-size: clamp(26px, 5vw, 44px); color: #ffcc00; text-shadow: 0 0 30px #ffcc00, 0 0 60px #996600; z-index: 10; opacity: 0; pointer-events: none; }
+    .hit-effect.show { animation: hit-pop 1s ease-out forwards; }
+    @keyframes hit-pop { 0%{opacity:0;transform:translate(-50%,-50%) scale(0.3)} 15%{opacity:1;transform:translate(-50%,-50%) scale(1.3)} 30%{transform:translate(-50%,-50%) scale(1)} 70%{opacity:1} 100%{opacity:0;transform:translate(-50%,-55%) scale(1.1)} }
+    .shake { animation: screen-shake 0.35s ease-out; }
+    @keyframes screen-shake { 0%{transform:translate(0)} 25%{transform:translate(-4px,2px)} 50%{transform:translate(3px,-2px)} 75%{transform:translate(-2px,1px)} 100%{transform:translate(0)} }
 
-    .panel {
-      border: 1px solid #1a1a1a;
-      background: #060606;
-      padding: 10px 12px;
-    }
-    .panel-title {
-      font-size: clamp(5px, 0.8vw, 6px);
-      color: #444;
-      letter-spacing: 2px;
-      margin-bottom: 8px;
-      text-align: center;
-    }
+    /* Bottom grid */
+    .bottom-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 0.6rem; margin-top: 0.5rem; }
+    @media (max-width: 700px) { .bottom-grid { grid-template-columns: 1fr; } }
+    .panel { border: 1px solid #1a1a1a; background: #060606; padding: 8px 10px; }
+    .panel-title { font-size: clamp(4px, 0.7vw, 5px); color: #444; letter-spacing: 2px; margin-bottom: 6px; text-align: center; }
 
-    /* Today's battle */
-    .battle-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 6px;
-    }
-    .battle-name { font-size: clamp(5px, 0.8vw, 7px); color: #666; }
-    .battle-val { font-size: clamp(12px, 2vw, 16px); color: #ccc; }
+    /* Battle */
+    .battle-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .battle-name { font-size: clamp(4px, 0.7vw, 6px); color: #555; }
+    .battle-val { font-size: clamp(11px, 1.8vw, 14px); color: #888; }
     .battle-val.win { color: #ffcc00; }
-    .battle-val.lose { color: #444; }
-    .battle-vs { font-size: clamp(7px, 1.2vw, 9px); color: #333; }
-    .battle-verdict {
-      text-align: center;
-      font-size: clamp(7px, 1.2vw, 10px);
-      color: #ffcc00;
-      letter-spacing: 1px;
-    }
-    .battle-verdict.lose { color: #555; }
-
-    /* Combo */
-    .combo-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    .combo-num {
-      font-size: clamp(14px, 2.5vw, 20px);
-      color: #ffcc00;
-    }
-    .combo-text {
-      font-size: clamp(6px, 1vw, 8px);
-      color: #996600;
-      letter-spacing: 1px;
-    }
-    .combo-row.hot .combo-num {
-      text-shadow: 0 0 20px rgba(255,204,0,0.6);
-      animation: combo-pulse 0.5s ease-in-out infinite alternate;
-    }
+    .battle-val.lose { color: #333; }
+    .battle-vs { font-size: clamp(6px, 1vw, 8px); color: #222; }
+    .battle-verdict { text-align: center; font-size: clamp(6px, 1vw, 8px); color: #ffcc00; letter-spacing: 1px; }
+    .battle-verdict.lose { color: #444; }
+    .combo-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; }
+    .combo-num { font-size: clamp(12px, 2vw, 16px); color: #ffcc00; }
+    .combo-text { font-size: clamp(5px, 0.8vw, 7px); color: #996600; letter-spacing: 1px; }
+    .combo-row.hot .combo-num { text-shadow: 0 0 16px rgba(255,204,0,0.5); animation: combo-pulse 0.5s ease-in-out infinite alternate; }
     @keyframes combo-pulse { from{transform:scale(1)} to{transform:scale(1.06)} }
 
     /* Predict */
-    .predict-date {
-      text-align: center;
-      font-size: clamp(10px, 1.8vw, 14px);
-      color: #ffcc00;
-      margin-bottom: 4px;
-    }
-    .predict-date.bad { color: #555; }
-    .predict-sub {
-      text-align: center;
-      font-size: clamp(4px, 0.7vw, 6px);
-      color: #444;
-      letter-spacing: 1px;
-    }
+    .predict-date { text-align: center; font-size: clamp(9px, 1.5vw, 12px); color: #ffcc00; margin-bottom: 3px; }
+    .predict-date.bad { color: #444; }
+    .predict-sub { text-align: center; font-size: clamp(4px, 0.6vw, 5px); color: #333; letter-spacing: 1px; }
 
     /* Chart */
-    .chart-wrap {
-      position: relative;
-      width: 100%;
-      height: 120px;
-    }
+    .chart-wrap { position: relative; width: 100%; height: 110px; }
 
-    /* ===== STATUS ===== */
-    .status { text-align: center; margin-top: 0.8rem; }
-    .status-main {
-      font-size: clamp(18px, 4vw, 30px);
-      color: #ffcc00;
-      letter-spacing: 4px;
-      animation: glow 2.5s ease-in-out infinite alternate;
-    }
-    .status-main.ko {
-      color: #ffcc00;
-      font-size: clamp(24px, 5.5vw, 42px);
-      animation: ko-flash 0.4s steps(2) infinite;
-    }
-    @keyframes glow {
-      from { text-shadow: 2px 2px 0 #663300; }
-      to   { text-shadow: 2px 2px 0 #663300, 0 0 30px rgba(255,204,0,0.4); }
-    }
-    @keyframes ko-flash {
-      0%  { text-shadow: 0 0 30px #ffcc00; }
-      50% { text-shadow: 0 0 60px #ff9900; }
-      100%{ text-shadow: 0 0 30px #ffcc00; }
-    }
-    .status-sub {
-      margin-top: 6px;
-      font-size: clamp(5px, 0.9vw, 7px);
-      color: #444;
-      letter-spacing: 2px;
-    }
+    /* Status */
+    .status { text-align: center; margin-top: 0.6rem; }
+    .status-main { font-size: clamp(16px, 3.5vw, 26px); color: #ffcc00; letter-spacing: 4px; animation: glow 2.5s ease-in-out infinite alternate; }
+    .status-main.ko { font-size: clamp(22px, 5vw, 36px); animation: ko-flash 0.4s steps(2) infinite; }
+    @keyframes glow { from{text-shadow:2px 2px 0 #663300} to{text-shadow:2px 2px 0 #663300, 0 0 24px rgba(255,204,0,0.3)} }
+    @keyframes ko-flash { 0%{text-shadow:0 0 20px #ffcc00} 50%{text-shadow:0 0 40px #ff9900} 100%{text-shadow:0 0 20px #ffcc00} }
+    .status-sub { margin-top: 4px; font-size: clamp(4px, 0.7vw, 6px); color: #333; letter-spacing: 2px; }
 
-    /* Button + footer */
-    .bottom-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 0.8rem;
-      gap: 12px;
-    }
-    #refreshBtn {
-      padding: 10px 20px;
-      font-family: 'Press Start 2P', monospace;
-      font-size: clamp(7px, 1.2vw, 10px);
-      color: #000;
-      background: #ffcc00;
-      border: none;
-      cursor: pointer;
-      letter-spacing: 2px;
-      box-shadow: 0 4px 0 #996600;
-      transition: transform 0.08s, box-shadow 0.08s;
-      white-space: nowrap;
-    }
+    /* Bottom bar */
+    .bottom-bar { display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem; }
+    #refreshBtn { padding: 8px 16px; font-family: 'Press Start 2P', monospace; font-size: clamp(6px, 1vw, 8px); color: #000; background: #ffcc00; border: none; cursor: pointer; letter-spacing: 2px; box-shadow: 0 3px 0 #996600; transition: transform 0.08s, box-shadow 0.08s; }
     #refreshBtn:hover { background: #ffe566; }
-    #refreshBtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #996600; }
-    #refreshBtn:disabled { background: #222; color: #555; box-shadow: 0 2px 0 #111; cursor: not-allowed; }
-    .footer { font-size: clamp(4px, 0.7vw, 6px); color: #222; letter-spacing: 1px; }
-    .live-dot {
-      display: inline-block;
-      width: 5px; height: 5px;
-      background: #ffcc00;
-      border-radius: 50%;
-      margin-right: 4px;
-      animation: pulse 1.5s ease-in-out infinite;
-      vertical-align: middle;
-    }
+    #refreshBtn:active { transform: translateY(2px); box-shadow: 0 1px 0 #996600; }
+    #refreshBtn:disabled { background: #222; color: #555; box-shadow: 0 1px 0 #111; cursor: not-allowed; }
+    .footer { font-size: clamp(4px, 0.6vw, 5px); color: #1a1a1a; letter-spacing: 1px; }
+    .live-dot { display: inline-block; width: 4px; height: 4px; background: #ffcc00; border-radius: 50%; margin-right: 3px; animation: pulse 1.5s ease-in-out infinite; vertical-align: middle; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* History table */
+    .history-toggle { display: block; width: 100%; margin-top: 0.5rem; padding: 6px; font-family: 'Press Start 2P', monospace; font-size: clamp(5px, 0.8vw, 7px); color: #555; background: #060606; border: 1px solid #1a1a1a; cursor: pointer; text-align: center; letter-spacing: 2px; }
+    .history-toggle:hover { color: #ffcc00; border-color: #333; }
+    .history-wrap { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .history-wrap.open { max-height: 600px; overflow-y: auto; }
+    .history-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+    .history-table th, .history-table td { padding: 4px 6px; font-size: clamp(4px, 0.6vw, 5px); text-align: right; border-bottom: 1px solid #111; }
+    .history-table th { color: #444; letter-spacing: 1px; position: sticky; top: 0; background: #060606; }
+    .history-table td { color: #666; }
+    .history-table td.date-col { text-align: left; color: #555; }
+    .history-table td.win { color: #ffcc00; }
+    .history-table td.lose { color: #333; }
+    .history-table tr:hover td { background: #0a0a0a; }
   </style>
 </head>
 <body>
@@ -369,7 +150,6 @@
       <span class="title-sub">THE FOLLOWERS WAR</span>
     </div>
 
-    <!-- HUD -->
     <div class="hud">
       <div class="hud-side">
         <span class="hud-name">CHRIS</span>
@@ -382,59 +162,36 @@
       </div>
     </div>
 
-    <!-- Arena -->
     <div class="arena" id="arena">
-      <div class="fighter chris" id="fighterChris">
-        <div class="fighter-info">
-          <div class="fighter-count" id="chrisCount">—</div>
-          <div class="fighter-daily flat" id="chrisDaily"></div>
+      <div class="fighter-side left" id="fighterChris">
+        <div class="fighter-label">
+          <div class="count" id="chrisCount">—</div>
+          <div class="daily" id="chrisDaily"></div>
         </div>
         <img src="https://www.muraldecal.com/en/img/arc244-png/folder/products-detalle-png/stickers-street-fighter-ryu-pixel-16-bits.png" alt="RYU">
       </div>
-      <div class="hit-effect" id="hitEffect"></div>
-      <div class="fighter ruben" id="fighterRuben">
-        <div class="fighter-info">
-          <div class="fighter-count" id="rubenCount">—</div>
-          <div class="fighter-daily flat" id="rubenDaily"></div>
+      <div class="arena-gap">
+        <div class="arena-gap-num" id="gapNum">—</div>
+        <div class="arena-gap-lbl">GAP</div>
+      </div>
+      <div class="fighter-side right" id="fighterRuben">
+        <div class="fighter-label">
+          <div class="count" id="rubenCount">—</div>
+          <div class="daily" id="rubenDaily"></div>
         </div>
         <img src="https://www.muraldecal.com/en/img/arc243-png/folder/products-detalle-png/stickers-street-fighter-ken-pixel-16-bits.png" alt="KEN">
       </div>
+      <div class="hit-effect" id="hitEffect"></div>
     </div>
 
-    <!-- Stats row -->
-    <div class="stats-row">
-      <div class="left">
-        <div class="stat-label">CHRIS</div>
-        <div class="stat-val" id="chrisStat">—</div>
-        <div class="stat-daily" id="chrisDailyStat"></div>
-      </div>
-      <div class="gap-center">
-        <div class="gap-num" id="gapNum">—</div>
-        <div class="gap-lbl">GAP</div>
-      </div>
-      <div class="right">
-        <div class="stat-label">RUBEN</div>
-        <div class="stat-val" id="rubenStat">—</div>
-        <div class="stat-daily" id="rubenDailyStat"></div>
-      </div>
-    </div>
-
-    <!-- Two-column panels -->
     <div class="bottom-grid">
-      <!-- Left: today + combo + prediction -->
       <div>
-        <div class="panel" style="margin-bottom:0.8rem">
+        <div class="panel" style="margin-bottom:0.6rem">
           <div class="panel-title">TODAY'S BATTLE</div>
           <div class="battle-row">
-            <div style="text-align:center">
-              <div class="battle-name">CHRIS</div>
-              <div class="battle-val" id="battleChris">—</div>
-            </div>
+            <div style="text-align:center"><div class="battle-name">CHRIS</div><div class="battle-val" id="battleChris">—</div></div>
             <span class="battle-vs">VS</span>
-            <div style="text-align:center">
-              <div class="battle-name">RUBEN</div>
-              <div class="battle-val" id="battleRuben">—</div>
-            </div>
+            <div style="text-align:center"><div class="battle-name">RUBEN</div><div class="battle-val" id="battleRuben">—</div></div>
           </div>
           <div class="battle-verdict" id="battleVerdict"></div>
           <div class="combo-row" id="comboRow" style="display:none">
@@ -448,24 +205,28 @@
           <div class="predict-sub" id="predictSub">LOADING...</div>
         </div>
       </div>
-
-      <!-- Right: chart -->
       <div class="panel">
         <div class="panel-title">GAP HISTORY</div>
-        <div class="chart-wrap">
-          <canvas id="gapChart"></canvas>
-        </div>
+        <div class="chart-wrap"><canvas id="gapChart"></canvas></div>
       </div>
     </div>
 
-    <!-- Status + button -->
     <div class="status">
       <div class="status-main" id="statusMain">FIGHT!</div>
       <div class="status-sub" id="statusSub"></div>
     </div>
+
     <div class="bottom-bar">
       <button id="refreshBtn">▶ REFRESH ◀</button>
       <div class="footer" id="footer"></div>
+    </div>
+
+    <button class="history-toggle" id="historyToggle">▼ BATTLE LOG ▼</button>
+    <div class="history-wrap" id="historyWrap">
+      <table class="history-table">
+        <thead><tr><th style="text-align:left">DATE</th><th>CHRIS</th><th>+/-</th><th>RUBEN</th><th>+/-</th><th>GAP</th><th>NET</th></tr></thead>
+        <tbody id="historyBody"></tbody>
+      </table>
     </div>
   </div>
 
@@ -494,16 +255,8 @@
     }
 
     function fmt(n) { return Math.abs(Math.round(n)).toLocaleString(); }
-
-    function addDays(date, days) {
-      const d = new Date(date);
-      d.setDate(d.getDate() + Math.ceil(days));
-      return d;
-    }
-
-    function fmtDate(d) {
-      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
-    }
+    function addDays(d, days) { const r = new Date(d); r.setDate(r.getDate() + Math.ceil(days)); return r; }
+    function fmtDate(d) { return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(); }
 
     async function fetchFromGviz() {
       const r = await fetchWithTimeout(GVIZ_URL);
@@ -513,7 +266,6 @@
       if (!match) throw new Error('gviz: unexpected format');
       const data = JSON.parse(match[1]);
       if (data.status !== 'ok') throw new Error('gviz status: ' + data.status);
-
       const rows = [];
       for (const row of data.table.rows) {
         if (!row || !row.c) continue;
@@ -533,13 +285,8 @@
     function parseCSV(text) {
       return text.trim().split('\n').map(line => {
         const fields = []; let inQ = false, f = '';
-        for (const ch of line) {
-          if (ch === '"') { inQ = !inQ; continue; }
-          if (ch === ',' && !inQ) { fields.push(f.trim()); f = ''; continue; }
-          f += ch;
-        }
-        fields.push(f.trim());
-        return fields;
+        for (const ch of line) { if (ch === '"') { inQ = !inQ; continue; } if (ch === ',' && !inQ) { fields.push(f.trim()); f = ''; continue; } f += ch; }
+        fields.push(f.trim()); return fields;
       });
     }
 
@@ -553,100 +300,68 @@
       return data;
     }
 
-    function calcOvertake(rows, currentGap) {
-      const diffs = rows.map(r => r.growth_diff).filter(d => d !== null && d !== undefined);
+    function calcOvertake(rows, gap) {
+      const diffs = rows.map(r => r.growth_diff).filter(d => d != null);
       if (!diffs.length) return null;
-      const todayDiff = diffs[diffs.length - 1];
-      if (todayDiff <= 0) return { type: 'losing', avg: todayDiff };
-      const days = currentGap / todayDiff;
-      return { type: 'winning', days, avg: todayDiff, date: addDays(new Date(), days) };
+      const d = diffs[diffs.length - 1];
+      if (d <= 0) return { type: 'losing', avg: d };
+      return { type: 'winning', days: gap / d, avg: d, date: addDays(new Date(), gap / d) };
     }
 
     function calcCombo(rows) {
-      let streak = 0;
-      for (let i = rows.length - 1; i >= 0; i--) {
-        const d = rows[i].growth_diff;
-        if (d === null || d === undefined) continue;
-        if (d > 0) streak++; else break;
-      }
-      return streak;
+      let s = 0;
+      for (let i = rows.length - 1; i >= 0; i--) { const d = rows[i].growth_diff; if (d == null) continue; if (d > 0) s++; else break; }
+      return s;
     }
 
     let chart = null;
     function renderGapChart(rows) {
       const pts = rows.filter(r => r.gap != null && r.date).map(r => ({ x: r.date, y: r.gap }));
       if (pts.length < 2) return;
-      const canvas = document.getElementById('gapChart');
       if (chart) { chart.destroy(); chart = null; }
-
-      chart = new Chart(canvas, {
+      chart = new Chart(document.getElementById('gapChart'), {
         type: 'line',
-        data: {
-          datasets: [{
-            data: pts,
-            borderColor: '#ffcc00',
-            backgroundColor: 'rgba(255,204,0,0.05)',
-            borderWidth: 2,
-            pointRadius: 0,
-            pointHitRadius: 10,
-            pointHoverRadius: 4,
-            pointHoverBackgroundColor: '#ffcc00',
-            fill: true,
-            tension: 0.3,
-          }]
-        },
+        data: { datasets: [{ data: pts, borderColor: '#ffcc00', backgroundColor: 'rgba(255,204,0,0.04)', borderWidth: 1.5, pointRadius: 0, pointHitRadius: 10, pointHoverRadius: 3, pointHoverBackgroundColor: '#ffcc00', fill: true, tension: 0.3 }] },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           interaction: { mode: 'nearest', intersect: false },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: '#111',
-              borderColor: '#333',
-              borderWidth: 1,
-              titleFont: { family: "'Press Start 2P', monospace", size: 6 },
-              bodyFont: { family: "'Press Start 2P', monospace", size: 8 },
-              titleColor: '#666',
-              bodyColor: '#ffcc00',
-              padding: 8,
-              displayColors: false,
-              callbacks: {
-                title: (i) => i[0]?.raw?.x || '',
-                label: (i) => 'GAP: ' + fmt(i.raw.y),
-              }
-            }
-          },
+          plugins: { legend: { display: false }, tooltip: { backgroundColor: '#111', borderColor: '#222', borderWidth: 1, titleFont: { family: "'Press Start 2P'", size: 5 }, bodyFont: { family: "'Press Start 2P'", size: 7 }, titleColor: '#555', bodyColor: '#ffcc00', padding: 6, displayColors: false, callbacks: { title: i => i[0]?.raw?.x || '', label: i => 'GAP: ' + fmt(i.raw.y) } } },
           scales: {
-            x: {
-              type: 'category',
-              ticks: { color: '#222', font: { family: "'Press Start 2P'", size: 5 }, maxTicksLimit: 5, maxRotation: 0 },
-              grid: { color: '#111' },
-              border: { color: '#222' },
-            },
-            y: {
-              ticks: { color: '#333', font: { family: "'Press Start 2P'", size: 6 }, callback: v => fmt(v) },
-              grid: { color: '#111' },
-              border: { color: '#222' },
-            }
+            x: { type: 'category', ticks: { color: '#1a1a1a', font: { family: "'Press Start 2P'", size: 4 }, maxTicksLimit: 5, maxRotation: 0 }, grid: { color: '#0d0d0d' }, border: { color: '#1a1a1a' } },
+            y: { ticks: { color: '#222', font: { family: "'Press Start 2P'", size: 5 }, callback: v => fmt(v) }, grid: { color: '#0d0d0d' }, border: { color: '#1a1a1a' } }
           }
         }
       });
     }
 
+    function renderHistory(rows) {
+      const body = document.getElementById('historyBody');
+      let html = '';
+      for (let i = rows.length - 1; i >= 0; i--) {
+        const r = rows[i];
+        const cd = r.chris_daily, rd = r.ruben_daily, gd = r.growth_diff;
+        const winCls = gd != null ? (gd > 0 ? 'win' : gd < 0 ? 'lose' : '') : '';
+        html += `<tr>
+          <td class="date-col">${r.date}</td>
+          <td>${fmt(r.chris)}</td>
+          <td>${cd != null ? (cd >= 0 ? '+' : '') + fmt(cd) : '—'}</td>
+          <td>${fmt(r.ruben)}</td>
+          <td>${rd != null ? (rd >= 0 ? '+' : '') + fmt(rd) : '—'}</td>
+          <td>${r.gap != null ? fmt(r.gap) : '—'}</td>
+          <td class="${winCls}">${gd != null ? (gd > 0 ? '+' : '') + fmt(gd) : '—'}</td>
+        </tr>`;
+      }
+      body.innerHTML = html;
+    }
+
     function triggerHit(diff) {
       const el = document.getElementById('hitEffect');
       const container = document.getElementById('mainContainer');
-      const c = document.getElementById('fighterChris');
-      const r = document.getElementById('fighterRuben');
-
+      const c = document.getElementById('fighterChris'), r = document.getElementById('fighterRuben');
       el.textContent = diff > 0 ? 'HIT!' : 'BLOCK!';
-      if (diff > 0) { c.classList.add('hurt'); r.classList.add('hit'); }
-      else { r.classList.add('hurt'); c.classList.add('hit'); }
-
+      if (diff > 0) { c.classList.add('hurt'); r.classList.add('hit'); } else { r.classList.add('hurt'); c.classList.add('hit'); }
       el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
       container.classList.remove('shake'); void container.offsetWidth; container.classList.add('shake');
-
       setTimeout(() => { c.classList.remove('hit','hurt'); r.classList.remove('hit','hurt'); }, 500);
     }
 
@@ -656,37 +371,11 @@
       const d = rows[rows.length - 1];
       const { chris, ruben, gap, date, hour, chris_daily, ruben_daily, growth_diff } = d;
 
-      // Counts in arena
       document.getElementById('chrisCount').textContent = fmt(chris);
       document.getElementById('rubenCount').textContent = fmt(ruben);
+      if (chris_daily != null) { const el = document.getElementById('chrisDaily'); el.textContent = (chris_daily >= 0 ? '+' : '') + fmt(chris_daily) + '/DAY'; el.className = 'daily ' + (chris_daily > 0 ? 'up' : ''); }
+      if (ruben_daily != null) { const el = document.getElementById('rubenDaily'); el.textContent = (ruben_daily >= 0 ? '+' : '') + fmt(ruben_daily) + '/DAY'; el.className = 'daily ' + (ruben_daily > 0 ? 'up' : ''); }
 
-      // Daily in arena
-      if (chris_daily !== null) {
-        const el = document.getElementById('chrisDaily');
-        el.textContent = (chris_daily >= 0 ? '+' : '') + fmt(chris_daily) + '/DAY';
-        el.className = 'fighter-daily ' + (chris_daily > 0 ? 'up' : 'down');
-      }
-      if (ruben_daily !== null) {
-        const el = document.getElementById('rubenDaily');
-        el.textContent = (ruben_daily >= 0 ? '+' : '') + fmt(ruben_daily) + '/DAY';
-        el.className = 'fighter-daily ' + (ruben_daily > 0 ? 'up' : 'down');
-      }
-
-      // Stats row
-      document.getElementById('chrisStat').textContent = fmt(chris);
-      document.getElementById('rubenStat').textContent = fmt(ruben);
-      if (chris_daily !== null) {
-        const el = document.getElementById('chrisDailyStat');
-        el.textContent = (chris_daily >= 0 ? '+' : '') + fmt(chris_daily) + ' TODAY';
-        el.className = 'stat-daily ' + (chris_daily > 0 ? 'up' : 'down');
-      }
-      if (ruben_daily !== null) {
-        const el = document.getElementById('rubenDailyStat');
-        el.textContent = (ruben_daily >= 0 ? '+' : '') + fmt(ruben_daily) + ' TODAY';
-        el.className = 'stat-daily ' + (ruben_daily > 0 ? 'up' : 'down');
-      }
-
-      // HP bars
       const chrisPct = Math.min(100, Math.max(0, (gap / chris) * 100));
       const rubenPct = Math.min(100, Math.max(0, (ruben / chris) * 100));
       document.getElementById('chrisHp').style.width = chrisPct + '%';
@@ -694,101 +383,45 @@
       if (chrisPct < 15) document.getElementById('chrisHp').classList.add('critical');
       else document.getElementById('chrisHp').classList.remove('critical');
 
-      // Gap
       document.getElementById('gapNum').textContent = fmt(Math.abs(gap));
 
-      // Today's battle
-      const bC = document.getElementById('battleChris');
-      const bR = document.getElementById('battleRuben');
-      const bV = document.getElementById('battleVerdict');
-      if (chris_daily !== null && ruben_daily !== null) {
-        bC.textContent = '+' + fmt(chris_daily);
-        bR.textContent = '+' + fmt(ruben_daily);
-        if (growth_diff > 0) {
-          bR.className = 'battle-val win';
-          bC.className = 'battle-val lose';
-          bV.textContent = 'RUBEN WINS  +' + fmt(ruben_daily - chris_daily) + ' NET';
-          bV.className = 'battle-verdict';
-        } else if (growth_diff < 0) {
-          bC.className = 'battle-val win';
-          bR.className = 'battle-val lose';
-          bV.textContent = 'CHRIS TAKES THIS ROUND';
-          bV.className = 'battle-verdict lose';
-        } else {
-          bC.className = bR.className = 'battle-val';
-          bV.textContent = 'DRAW';
-          bV.className = 'battle-verdict';
-        }
+      // Battle
+      const bC = document.getElementById('battleChris'), bR = document.getElementById('battleRuben'), bV = document.getElementById('battleVerdict');
+      if (chris_daily != null && ruben_daily != null) {
+        bC.textContent = '+' + fmt(chris_daily); bR.textContent = '+' + fmt(ruben_daily);
+        if (growth_diff > 0) { bR.className = 'battle-val win'; bC.className = 'battle-val lose'; bV.textContent = 'RUBEN WINS +' + fmt(ruben_daily - chris_daily) + ' NET'; bV.className = 'battle-verdict'; }
+        else if (growth_diff < 0) { bC.className = 'battle-val win'; bR.className = 'battle-val lose'; bV.textContent = 'CHRIS TAKES THIS ROUND'; bV.className = 'battle-verdict lose'; }
+        else { bC.className = bR.className = 'battle-val'; bV.textContent = 'DRAW'; bV.className = 'battle-verdict'; }
       }
 
-      // Combo
       const combo = calcCombo(rows);
-      const comboRow = document.getElementById('comboRow');
-      if (combo >= 2) {
-        comboRow.style.display = 'flex';
-        document.getElementById('comboNum').textContent = combo;
-        const label = combo >= 10 ? 'ULTRA COMBO!' : combo >= 5 ? 'SUPER COMBO!' : 'DAY STREAK';
-        document.getElementById('comboText').textContent = label;
-        comboRow.className = combo >= 5 ? 'combo-row hot' : 'combo-row';
-      } else {
-        comboRow.style.display = 'none';
-      }
+      const cr = document.getElementById('comboRow');
+      if (combo >= 2) { cr.style.display = 'flex'; document.getElementById('comboNum').textContent = combo; document.getElementById('comboText').textContent = combo >= 10 ? 'ULTRA COMBO!' : combo >= 5 ? 'SUPER COMBO!' : 'DAY STREAK'; cr.className = combo >= 5 ? 'combo-row hot' : 'combo-row'; }
+      else { cr.style.display = 'none'; }
 
-      // Chart
       renderGapChart(rows);
+      renderHistory(rows);
 
-      // Prediction
       const p = calcOvertake(rows, gap);
-      const dateEl = document.getElementById('predictDate');
-      const subEl = document.getElementById('predictSub');
-      if (!p) {
-        dateEl.textContent = '?'; dateEl.className = 'predict-date bad';
-        subEl.textContent = 'NOT ENOUGH DATA';
-      } else if (gap <= 0) {
-        dateEl.textContent = 'DEFEATED!'; dateEl.className = 'predict-date';
-        subEl.textContent = 'RUBEN HAS OVERTAKEN CHRIS';
-      } else if (p.type === 'losing') {
-        dateEl.textContent = 'NEVER AT THIS PACE'; dateEl.className = 'predict-date bad';
-        subEl.textContent = fmt(Math.abs(p.avg)) + '/DAY BEHIND TODAY';
-      } else {
-        dateEl.textContent = fmtDate(p.date); dateEl.className = 'predict-date';
-        subEl.textContent = Math.ceil(p.days) + ' DAYS  ·  +' + fmt(p.avg) + '/DAY NET';
-      }
+      const dateEl = document.getElementById('predictDate'), subEl = document.getElementById('predictSub');
+      if (!p) { dateEl.textContent = '?'; dateEl.className = 'predict-date bad'; subEl.textContent = 'NOT ENOUGH DATA'; }
+      else if (gap <= 0) { dateEl.textContent = 'DEFEATED!'; dateEl.className = 'predict-date'; subEl.textContent = 'RUBEN HAS OVERTAKEN CHRIS'; }
+      else if (p.type === 'losing') { dateEl.textContent = 'NEVER AT THIS PACE'; dateEl.className = 'predict-date bad'; subEl.textContent = fmt(Math.abs(p.avg)) + '/DAY BEHIND TODAY'; }
+      else { dateEl.textContent = fmtDate(p.date); dateEl.className = 'predict-date'; subEl.textContent = Math.ceil(p.days) + ' DAYS  ·  +' + fmt(p.avg) + '/DAY NET'; }
 
-      // Status
-      const main = document.getElementById('statusMain');
-      const sub = document.getElementById('statusSub');
+      const main = document.getElementById('statusMain'), sub = document.getElementById('statusSub');
       main.className = 'status-main';
-      if (gap <= 0) {
-        main.textContent = 'K.O.!'; main.className = 'status-main ko';
-        sub.textContent = 'FLAWLESS VICTORY';
-      } else {
-        const pct = (gap / chris) * 100;
-        if (pct > 45) { main.textContent = 'FIGHT!'; sub.textContent = growth_diff > 0 ? 'RUBEN IS CLOSING THE GAP' : 'CHRIS PULLS AHEAD'; }
-        else if (pct > 15) { main.textContent = 'CLOSING IN!'; sub.textContent = 'THE GAP IS SHRINKING'; }
-        else { main.textContent = 'FINISH HIM!'; sub.textContent = 'CHRIS IS ON THE ROPES'; }
-      }
+      if (gap <= 0) { main.textContent = 'K.O.!'; main.className = 'status-main ko'; sub.textContent = 'FLAWLESS VICTORY'; }
+      else { const pct = (gap / chris) * 100; if (pct > 45) { main.textContent = 'FIGHT!'; sub.textContent = growth_diff > 0 ? 'RUBEN IS CLOSING THE GAP' : 'CHRIS PULLS AHEAD'; } else if (pct > 15) { main.textContent = 'CLOSING IN!'; sub.textContent = 'THE GAP IS SHRINKING'; } else { main.textContent = 'FINISH HIM!'; sub.textContent = 'CHRIS IS ON THE ROPES'; } }
 
-      // Hit animation
-      if (firstRender && growth_diff !== null) {
-        setTimeout(() => triggerHit(growth_diff), 600);
-        firstRender = false;
-      }
-
-      // Footer
-      document.getElementById('footer').innerHTML =
-        `<span class="live-dot"></span>LIVE &nbsp; ${date} ${hour}`;
+      if (firstRender && growth_diff != null) { setTimeout(() => triggerHit(growth_diff), 600); firstRender = false; }
+      document.getElementById('footer').innerHTML = `<span class="live-dot"></span>LIVE &nbsp; ${date} ${hour}`;
     }
 
     async function loadLive() {
-      try { const rows = await fetchFromGviz(); if (rows.length) { renderUI(rows); return; } }
-      catch (e) { console.warn('gviz:', e.message); }
-      for (const url of PROXIES) {
-        try { const r = await fetchWithTimeout(url); if (!r.ok) continue; const rows = processCSVRows(parseCSV(await r.text())); if (rows.length) { renderUI(rows); return; } }
-        catch (e) { console.warn('proxy:', e.message); }
-      }
-      try { const r = await fetchWithTimeout('./data.json?t=' + Date.now()); const d = await r.json(); renderUI(d.history || [d.latest]); }
-      catch (e) { document.getElementById('statusMain').textContent = 'ERROR'; }
+      try { const rows = await fetchFromGviz(); if (rows.length) { renderUI(rows); return; } } catch (e) { console.warn('gviz:', e.message); }
+      for (const url of PROXIES) { try { const r = await fetchWithTimeout(url); if (!r.ok) continue; const rows = processCSVRows(parseCSV(await r.text())); if (rows.length) { renderUI(rows); return; } } catch (e) { console.warn('proxy:', e.message); } }
+      try { const r = await fetchWithTimeout('./data.json?t=' + Date.now()); const d = await r.json(); renderUI(d.history || [d.latest]); } catch (e) { document.getElementById('statusMain').textContent = 'ERROR'; }
     }
 
     document.getElementById('refreshBtn').addEventListener('click', () => {
@@ -796,6 +429,13 @@
       btn.disabled = true; btn.textContent = '...';
       firstRender = true;
       loadLive().finally(() => { btn.disabled = false; btn.textContent = '▶ REFRESH ◀'; });
+    });
+
+    document.getElementById('historyToggle').addEventListener('click', () => {
+      const wrap = document.getElementById('historyWrap');
+      const btn = document.getElementById('historyToggle');
+      wrap.classList.toggle('open');
+      btn.textContent = wrap.classList.contains('open') ? '▲ BATTLE LOG ▲' : '▼ BATTLE LOG ▼';
     });
 
     loadLive();
