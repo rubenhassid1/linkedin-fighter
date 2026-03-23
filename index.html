@@ -12,13 +12,11 @@
     body {
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       font-family: 'Press Start 2P', monospace;
       color: #fff;
       background: #000;
-      overflow-x: hidden;
     }
 
     /* CRT scanlines */
@@ -26,63 +24,57 @@
       content: '';
       position: fixed;
       inset: 0;
-      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px);
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px);
       pointer-events: none;
       z-index: 100;
     }
 
-    .container {
+    .page {
       position: relative;
       z-index: 2;
-      width: min(95vw, 750px);
-      padding: 1rem 1.5rem 1.5rem;
+      width: min(98vw, 1100px);
+      padding: 1rem;
     }
 
     /* ===== TITLE ===== */
-    .title { text-align: center; margin-bottom: 1.2rem; }
+    .title { text-align: center; margin-bottom: 0.8rem; }
     .title-main {
-      display: block;
-      font-size: clamp(16px, 4vw, 30px);
+      font-size: clamp(18px, 3.5vw, 32px);
       color: #ffcc00;
-      text-shadow: 3px 3px 0 #cc8800, 5px 5px 0 #995500, 7px 7px 0 #662200;
+      text-shadow: 2px 2px 0 #996600, 4px 4px 0 #663300;
       letter-spacing: 3px;
-      margin-bottom: 0.4rem;
     }
     .title-sub {
       display: block;
-      font-size: clamp(6px, 1.2vw, 8px);
-      color: #884400;
+      font-size: clamp(5px, 1vw, 7px);
+      color: #664400;
       letter-spacing: 4px;
+      margin-top: 4px;
     }
 
-    /* ===== DUAL HEALTH BARS (SF2 style) ===== */
+    /* ===== HUD (health bars) ===== */
     .hud {
       display: grid;
-      grid-template-columns: 1fr 60px 1fr;
+      grid-template-columns: 1fr 40px 1fr;
       align-items: end;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
       gap: 6px;
     }
-    .hud-side { display: flex; flex-direction: column; gap: 4px; }
-    .hud-name {
-      font-size: clamp(8px, 1.6vw, 11px);
-      letter-spacing: 2px;
-    }
-    .hud-name.chris { color: #44aaff; }
-    .hud-name.ruben { color: #ff4444; text-align: right; }
+    .hud-side { display: flex; flex-direction: column; gap: 3px; }
+    .hud-name { font-size: clamp(7px, 1.2vw, 9px); letter-spacing: 2px; color: #888; }
+    .hud-name.right { text-align: right; }
     .hp-bar {
-      height: 28px;
+      height: 22px;
       border: 2px solid #ffcc00;
       background: #111;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 0 12px rgba(255,204,0,0.2);
     }
     .hp-bar::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: repeating-linear-gradient(90deg, transparent, transparent calc(10% - 1px), rgba(0,0,0,0.4) calc(10% - 1px), rgba(0,0,0,0.4) 10%);
+      background: repeating-linear-gradient(90deg, transparent, transparent calc(10% - 1px), rgba(0,0,0,0.35) calc(10% - 1px), rgba(0,0,0,0.35) 10%);
       z-index: 2;
       pointer-events: none;
     }
@@ -92,50 +84,43 @@
       transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 1;
     }
-    /* Chris bar: fills from RIGHT, yellow = his remaining lead */
     .hp-fill.chris-hp {
       right: 0;
-      background: linear-gradient(270deg, #ffcc00 0%, #ff9900 60%, #cc6600 100%);
+      background: linear-gradient(270deg, #ffcc00 0%, #cc9900 100%);
     }
-    /* Ruben bar: fills from LEFT, red/orange = his progress */
     .hp-fill.ruben-hp {
       left: 0;
-      background: linear-gradient(90deg, #cc0000 0%, #ff3333 40%, #ff6644 80%, #ff9944 100%);
+      background: linear-gradient(90deg, #cc9900 0%, #ffcc00 100%);
     }
-    .hp-fill.critical {
-      animation: hp-flash 0.3s steps(2) infinite;
-    }
-    @keyframes hp-flash { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .hp-fill.critical { animation: hp-flash 0.3s steps(2) infinite; }
+    @keyframes hp-flash { 0%,100%{opacity:1} 50%{opacity:.4} }
     .hud-vs {
       text-align: center;
-      font-size: clamp(14px, 3vw, 22px);
-      color: #ff0033;
-      text-shadow: 0 0 20px rgba(255,0,50,0.6);
+      font-size: clamp(10px, 2vw, 16px);
+      color: #ffcc00;
       align-self: center;
-      line-height: 1;
     }
 
     /* ===== ARENA ===== */
     .arena {
       position: relative;
-      background: radial-gradient(ellipse at 50% 80%, #1a0a2e 0%, #0a0015 60%, #000 100%);
-      border: 2px solid #222;
-      border-bottom: 3px solid #ffcc00;
-      min-height: 200px;
+      background: radial-gradient(ellipse at 50% 90%, #110a1e 0%, #050008 70%);
+      border: 1px solid #1a1a1a;
+      border-bottom: 3px solid #ffcc0066;
       display: flex;
       align-items: flex-end;
-      justify-content: space-between;
-      padding: 0 1.5rem;
-      margin-bottom: 0;
+      justify-content: center;
+      gap: 0;
+      padding: 0 1rem;
+      height: clamp(180px, 28vw, 240px);
       overflow: hidden;
     }
-    /* Stage floor glow */
     .arena::after {
       content: '';
       position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, transparent 5%, #ffcc0044 20%, #ffcc0088 50%, #ffcc0044 80%, transparent 95%);
+      bottom: 0; left: 10%; right: 10%;
+      height: 3px;
+      background: radial-gradient(ellipse, #ffcc0044, transparent);
     }
     .fighter {
       position: relative;
@@ -145,366 +130,343 @@
       align-items: center;
     }
     .fighter img {
-      width: clamp(80px, 18vw, 130px);
+      width: clamp(90px, 16vw, 140px);
       height: auto;
       image-rendering: pixelated;
-      filter: drop-shadow(0 0 12px rgba(255,255,255,0.15));
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
       transition: filter 0.3s;
     }
-    .fighter.chris img { transform: scaleX(1); }
+    /* Chris faces RIGHT (default), Ruben faces LEFT */
     .fighter.ruben img { transform: scaleX(-1); }
     .fighter.hit img { filter: brightness(3) drop-shadow(0 0 20px #fff); }
-    .fighter.hurt img { filter: brightness(0.4) sepia(1) hue-rotate(-30deg); }
+    .fighter.hurt img { filter: brightness(0.3) sepia(0.5); }
+    .fighter-info {
+      text-align: center;
+      margin-bottom: 4px;
+    }
     .fighter-count {
-      font-size: clamp(9px, 1.8vw, 13px);
-      margin-bottom: 6px;
-      text-shadow: 0 0 10px rgba(0,0,0,0.8);
+      font-size: clamp(10px, 1.8vw, 14px);
+      color: #fff;
     }
-    .fighter.chris .fighter-count { color: #44aaff; }
-    .fighter.ruben .fighter-count { color: #ff4444; }
     .fighter-daily {
-      font-size: clamp(6px, 1.1vw, 8px);
-      margin-bottom: 8px;
+      font-size: clamp(6px, 1vw, 8px);
+      color: #666;
     }
-    .fighter-daily.up { color: #44ff44; }
-    .fighter-daily.down { color: #ff4444; }
+    .fighter-daily.up { color: #ffcc00; }
+    .fighter-daily.down { color: #555; }
 
-    /* Hit effect overlay */
+    /* Hit effect */
     .hit-effect {
       position: absolute;
-      top: 50%;
+      top: 40%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: clamp(24px, 6vw, 48px);
+      font-size: clamp(28px, 6vw, 52px);
       color: #ffcc00;
-      text-shadow: 0 0 30px #ff6600, 0 0 60px #ff3300;
+      text-shadow: 0 0 40px #ffcc00, 0 0 80px #996600;
       z-index: 10;
       opacity: 0;
       pointer-events: none;
     }
-    .hit-effect.show {
-      animation: hit-pop 1.2s ease-out forwards;
-    }
+    .hit-effect.show { animation: hit-pop 1s ease-out forwards; }
     @keyframes hit-pop {
       0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
       15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
       30%  { transform: translate(-50%, -50%) scale(1); }
       70%  { opacity: 1; }
-      100% { opacity: 0; transform: translate(-50%, -60%) scale(1.1); }
+      100% { opacity: 0; transform: translate(-50%, -55%) scale(1.1); }
     }
-
-    /* Screen shake */
-    .shake { animation: screen-shake 0.4s ease-out; }
+    .shake { animation: screen-shake 0.35s ease-out; }
     @keyframes screen-shake {
       0%  { transform: translate(0); }
-      20% { transform: translate(-6px, 3px); }
-      40% { transform: translate(5px, -2px); }
-      60% { transform: translate(-3px, 4px); }
-      80% { transform: translate(4px, -1px); }
+      25% { transform: translate(-5px, 2px); }
+      50% { transform: translate(4px, -3px); }
+      75% { transform: translate(-2px, 1px); }
       100%{ transform: translate(0); }
     }
 
-    /* ===== GAP DISPLAY ===== */
-    .gap-bar {
+    /* ===== STATS ROW (below arena) ===== */
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
       background: #0a0a0a;
-      border-left: 2px solid #222;
-      border-right: 2px solid #222;
-      padding: 10px 16px;
-      display: flex;
-      justify-content: space-between;
+      border: 1px solid #1a1a1a;
+      border-top: none;
+      padding: 8px 14px;
+      margin-bottom: 0.8rem;
       align-items: center;
-      margin-bottom: 1rem;
     }
-    .gap-number {
-      font-size: clamp(14px, 3vw, 22px);
-      color: #ffcc00;
+    .stats-row .left { text-align: left; }
+    .stats-row .right { text-align: right; }
+    .stat-label { font-size: clamp(4px, 0.7vw, 5px); color: #444; letter-spacing: 1px; }
+    .stat-val { font-size: clamp(8px, 1.4vw, 11px); color: #ccc; }
+    .stat-daily { font-size: clamp(5px, 0.9vw, 7px); color: #666; margin-top: 2px; }
+    .stat-daily.up { color: #ffcc00; }
+    .stat-daily.down { color: #555; }
+    .gap-center { text-align: center; }
+    .gap-num { font-size: clamp(12px, 2.5vw, 18px); color: #ffcc00; }
+    .gap-lbl { font-size: clamp(4px, 0.7vw, 5px); color: #444; letter-spacing: 1px; margin-top: 2px; }
+
+    /* ===== TWO-COLUMN BOTTOM ===== */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
     }
-    .gap-label {
-      font-size: clamp(5px, 0.9vw, 7px);
-      color: #555;
-      letter-spacing: 2px;
+    @media (max-width: 700px) {
+      .bottom-grid { grid-template-columns: 1fr; }
     }
 
-    /* ===== TODAY'S BATTLE ===== */
-    .battle-result {
-      border: 2px solid #333;
-      background: linear-gradient(180deg, #0d0d1a 0%, #000 100%);
-      padding: 14px;
-      margin-bottom: 1rem;
+    .panel {
+      border: 1px solid #1a1a1a;
+      background: #060606;
+      padding: 10px 12px;
+    }
+    .panel-title {
+      font-size: clamp(5px, 0.8vw, 6px);
+      color: #444;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
       text-align: center;
     }
-    .battle-title {
-      font-size: clamp(5px, 0.9vw, 7px);
-      color: #555;
-      letter-spacing: 3px;
-      margin-bottom: 10px;
-    }
-    .battle-scores {
+
+    /* Today's battle */
+    .battle-row {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 8px;
-    }
-    .battle-fighter {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-    .battle-fighter-name {
-      font-size: clamp(6px, 1vw, 8px);
-      letter-spacing: 1px;
-    }
-    .battle-fighter-name.chris { color: #44aaff; }
-    .battle-fighter-name.ruben { color: #ff4444; }
-    .battle-fighter-val {
-      font-size: clamp(14px, 2.8vw, 20px);
-    }
-    .battle-fighter-val.winning { color: #44ff44; }
-    .battle-fighter-val.losing { color: #ff4444; opacity: 0.6; }
-    .battle-vs {
-      font-size: clamp(8px, 1.5vw, 11px);
-      color: #333;
-    }
-    .battle-verdict {
-      font-size: clamp(10px, 2vw, 14px);
-      letter-spacing: 2px;
-      margin-top: 4px;
-    }
-    .battle-verdict.win { color: #44ff44; text-shadow: 0 0 20px rgba(68,255,68,0.4); }
-    .battle-verdict.lose { color: #ff4444; }
-
-    /* ===== COMBO STREAK ===== */
-    .combo-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 10px;
-      margin-bottom: 1rem;
-      min-height: 40px;
-    }
-    .combo-count {
-      font-size: clamp(16px, 3.5vw, 26px);
-      color: #ffcc00;
-      text-shadow: 0 0 20px rgba(255,204,0,0.5);
-    }
-    .combo-label {
-      font-size: clamp(7px, 1.3vw, 10px);
-      color: #ff6600;
-      letter-spacing: 2px;
-    }
-    .combo-bar.fire .combo-count {
-      color: #ff3300;
-      text-shadow: 0 0 30px rgba(255,50,0,0.7), 0 0 60px rgba(255,100,0,0.3);
-      animation: combo-pulse 0.6s ease-in-out infinite alternate;
-    }
-    .combo-bar.fire .combo-label { color: #ff3300; }
-    @keyframes combo-pulse {
-      from { transform: scale(1); }
-      to   { transform: scale(1.08); }
-    }
-
-    /* ===== PREDICT BOX ===== */
-    .predict-box {
-      border: 1px solid #333;
-      padding: 14px;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-    .predict-label {
-      font-size: clamp(5px, 0.9vw, 7px);
-      color: #555;
-      letter-spacing: 2px;
-      margin-bottom: 8px;
-    }
-    .predict-date {
-      font-size: clamp(12px, 2.5vw, 18px);
-      color: #44ff44;
+      gap: 12px;
       margin-bottom: 6px;
     }
-    .predict-date.bad { color: #ff4444; }
+    .battle-name { font-size: clamp(5px, 0.8vw, 7px); color: #666; }
+    .battle-val { font-size: clamp(12px, 2vw, 16px); color: #ccc; }
+    .battle-val.win { color: #ffcc00; }
+    .battle-val.lose { color: #444; }
+    .battle-vs { font-size: clamp(7px, 1.2vw, 9px); color: #333; }
+    .battle-verdict {
+      text-align: center;
+      font-size: clamp(7px, 1.2vw, 10px);
+      color: #ffcc00;
+      letter-spacing: 1px;
+    }
+    .battle-verdict.lose { color: #555; }
+
+    /* Combo */
+    .combo-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .combo-num {
+      font-size: clamp(14px, 2.5vw, 20px);
+      color: #ffcc00;
+    }
+    .combo-text {
+      font-size: clamp(6px, 1vw, 8px);
+      color: #996600;
+      letter-spacing: 1px;
+    }
+    .combo-row.hot .combo-num {
+      text-shadow: 0 0 20px rgba(255,204,0,0.6);
+      animation: combo-pulse 0.5s ease-in-out infinite alternate;
+    }
+    @keyframes combo-pulse { from{transform:scale(1)} to{transform:scale(1.06)} }
+
+    /* Predict */
+    .predict-date {
+      text-align: center;
+      font-size: clamp(10px, 1.8vw, 14px);
+      color: #ffcc00;
+      margin-bottom: 4px;
+    }
+    .predict-date.bad { color: #555; }
     .predict-sub {
-      font-size: clamp(5px, 0.9vw, 7px);
-      color: #555;
+      text-align: center;
+      font-size: clamp(4px, 0.7vw, 6px);
+      color: #444;
       letter-spacing: 1px;
     }
 
-    /* ===== GAP HISTORY SPARKLINE ===== */
-    .chart-box {
-      border: 1px solid #222;
-      padding: 12px 14px;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-    .chart-title {
-      font-size: clamp(5px, 0.9vw, 7px);
-      color: #555;
-      letter-spacing: 2px;
-      margin-bottom: 10px;
-    }
+    /* Chart */
     .chart-wrap {
       position: relative;
       width: 100%;
-      height: 180px;
+      height: 120px;
     }
 
     /* ===== STATUS ===== */
-    .status { text-align: center; margin-bottom: 1rem; }
+    .status { text-align: center; margin-top: 0.8rem; }
     .status-main {
-      font-size: clamp(20px, 5vw, 36px);
+      font-size: clamp(18px, 4vw, 30px);
       color: #ffcc00;
-      letter-spacing: 5px;
+      letter-spacing: 4px;
       animation: glow 2.5s ease-in-out infinite alternate;
     }
     .status-main.ko {
-      color: #ff0000;
-      font-size: clamp(28px, 7vw, 52px);
+      color: #ffcc00;
+      font-size: clamp(24px, 5.5vw, 42px);
       animation: ko-flash 0.4s steps(2) infinite;
     }
     @keyframes glow {
-      from { text-shadow: 2px 2px 0 #996600; }
-      to   { text-shadow: 2px 2px 0 #996600, 0 0 40px rgba(255,204,0,.5); }
+      from { text-shadow: 2px 2px 0 #663300; }
+      to   { text-shadow: 2px 2px 0 #663300, 0 0 30px rgba(255,204,0,0.4); }
     }
     @keyframes ko-flash {
-      0%  { color:#ff0000; text-shadow:0 0 30px #ff0000; }
-      50% { color:#ffcc00; text-shadow:0 0 40px #ffaa00; }
-      100%{ color:#ff0000; text-shadow:0 0 30px #ff0000; }
+      0%  { text-shadow: 0 0 30px #ffcc00; }
+      50% { text-shadow: 0 0 60px #ff9900; }
+      100%{ text-shadow: 0 0 30px #ffcc00; }
     }
-    .status-sub { margin-top: 10px; font-size: clamp(6px,1.1vw,8px); color: #555; letter-spacing: 2px; }
+    .status-sub {
+      margin-top: 6px;
+      font-size: clamp(5px, 0.9vw, 7px);
+      color: #444;
+      letter-spacing: 2px;
+    }
 
-    /* ===== REFRESH BUTTON ===== */
+    /* Button + footer */
+    .bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.8rem;
+      gap: 12px;
+    }
     #refreshBtn {
-      display: block;
-      width: 100%;
-      padding: 14px 24px;
-      margin-bottom: 1rem;
+      padding: 10px 20px;
       font-family: 'Press Start 2P', monospace;
-      font-size: clamp(10px, 2vw, 14px);
+      font-size: clamp(7px, 1.2vw, 10px);
       color: #000;
       background: #ffcc00;
       border: none;
       cursor: pointer;
       letter-spacing: 2px;
-      box-shadow: 0 6px 0 #996600, 0 8px 20px rgba(0,0,0,0.6);
+      box-shadow: 0 4px 0 #996600;
       transition: transform 0.08s, box-shadow 0.08s;
+      white-space: nowrap;
     }
     #refreshBtn:hover { background: #ffe566; }
-    #refreshBtn:active { transform: translateY(5px); box-shadow: 0 1px 0 #996600; }
-    #refreshBtn:disabled { background: #333; color: #666; box-shadow: 0 2px 0 #111; cursor: not-allowed; }
-
-    /* Live dot */
+    #refreshBtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #996600; }
+    #refreshBtn:disabled { background: #222; color: #555; box-shadow: 0 2px 0 #111; cursor: not-allowed; }
+    .footer { font-size: clamp(4px, 0.7vw, 6px); color: #222; letter-spacing: 1px; }
     .live-dot {
       display: inline-block;
-      width: 6px; height: 6px;
-      background: #44ff44;
+      width: 5px; height: 5px;
+      background: #ffcc00;
       border-radius: 50%;
-      margin-right: 6px;
+      margin-right: 4px;
       animation: pulse 1.5s ease-in-out infinite;
       vertical-align: middle;
     }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-    .footer { text-align: center; font-size: clamp(5px, 0.85vw, 7px); color: #2a2a2a; letter-spacing: 1px; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 500px) {
-      .arena { min-height: 160px; padding: 0 0.8rem; }
-      .hud { gap: 4px; }
-      .gap-bar { padding: 8px 10px; }
-      .battle-scores { gap: 10px; }
-      .combo-bar { padding: 8px; }
-    }
   </style>
 </head>
 <body>
-  <div class="container" id="mainContainer">
+  <div class="page" id="mainContainer">
     <div class="title">
       <span class="title-main">LINKEDIN FIGHTER II</span>
       <span class="title-sub">THE FOLLOWERS WAR</span>
     </div>
 
-    <!-- HUD: Dual health bars -->
+    <!-- HUD -->
     <div class="hud">
       <div class="hud-side">
-        <span class="hud-name chris">CHRIS</span>
+        <span class="hud-name">CHRIS</span>
         <div class="hp-bar"><div class="hp-fill chris-hp" id="chrisHp" style="width:100%"></div></div>
       </div>
       <div class="hud-vs">VS</div>
       <div class="hud-side">
-        <span class="hud-name ruben">RUBEN</span>
+        <span class="hud-name right">RUBEN</span>
         <div class="hp-bar"><div class="hp-fill ruben-hp" id="rubenHp" style="width:0%"></div></div>
       </div>
     </div>
 
-    <!-- Arena with fighters -->
+    <!-- Arena -->
     <div class="arena" id="arena">
       <div class="fighter chris" id="fighterChris">
-        <span class="fighter-daily flat" id="chrisDaily"></span>
-        <span class="fighter-count" id="chrisCount">—</span>
-        <img src="https://www.muraldecal.com/en/img/arc244-png/folder/products-detalle-png/stickers-street-fighter-ryu-pixel-16-bits.png" alt="CHRIS (RYU)">
+        <div class="fighter-info">
+          <div class="fighter-count" id="chrisCount">—</div>
+          <div class="fighter-daily flat" id="chrisDaily"></div>
+        </div>
+        <img src="https://www.muraldecal.com/en/img/arc244-png/folder/products-detalle-png/stickers-street-fighter-ryu-pixel-16-bits.png" alt="RYU">
       </div>
       <div class="hit-effect" id="hitEffect"></div>
       <div class="fighter ruben" id="fighterRuben">
-        <span class="fighter-daily flat" id="rubenDaily"></span>
-        <span class="fighter-count" id="rubenCount">—</span>
-        <img src="https://www.muraldecal.com/en/img/arc243-png/folder/products-detalle-png/stickers-street-fighter-ken-pixel-16-bits.png" alt="RUBEN (KEN)">
+        <div class="fighter-info">
+          <div class="fighter-count" id="rubenCount">—</div>
+          <div class="fighter-daily flat" id="rubenDaily"></div>
+        </div>
+        <img src="https://www.muraldecal.com/en/img/arc243-png/folder/products-detalle-png/stickers-street-fighter-ken-pixel-16-bits.png" alt="KEN">
       </div>
     </div>
 
-    <!-- Gap display -->
-    <div class="gap-bar">
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="left">
+        <div class="stat-label">CHRIS</div>
+        <div class="stat-val" id="chrisStat">—</div>
+        <div class="stat-daily" id="chrisDailyStat"></div>
+      </div>
+      <div class="gap-center">
+        <div class="gap-num" id="gapNum">—</div>
+        <div class="gap-lbl">GAP</div>
+      </div>
+      <div class="right">
+        <div class="stat-label">RUBEN</div>
+        <div class="stat-val" id="rubenStat">—</div>
+        <div class="stat-daily" id="rubenDailyStat"></div>
+      </div>
+    </div>
+
+    <!-- Two-column panels -->
+    <div class="bottom-grid">
+      <!-- Left: today + combo + prediction -->
       <div>
-        <div class="gap-label">FOLLOWER GAP</div>
-      </div>
-      <div class="gap-number" id="gapNum">—</div>
-    </div>
-
-    <!-- Today's battle result -->
-    <div class="battle-result" id="battleResult">
-      <div class="battle-title">TODAY'S BATTLE</div>
-      <div class="battle-scores">
-        <div class="battle-fighter">
-          <span class="battle-fighter-name chris">CHRIS</span>
-          <span class="battle-fighter-val" id="battleChris">—</span>
+        <div class="panel" style="margin-bottom:0.8rem">
+          <div class="panel-title">TODAY'S BATTLE</div>
+          <div class="battle-row">
+            <div style="text-align:center">
+              <div class="battle-name">CHRIS</div>
+              <div class="battle-val" id="battleChris">—</div>
+            </div>
+            <span class="battle-vs">VS</span>
+            <div style="text-align:center">
+              <div class="battle-name">RUBEN</div>
+              <div class="battle-val" id="battleRuben">—</div>
+            </div>
+          </div>
+          <div class="battle-verdict" id="battleVerdict"></div>
+          <div class="combo-row" id="comboRow" style="display:none">
+            <span class="combo-num" id="comboNum"></span>
+            <span class="combo-text" id="comboText"></span>
+          </div>
         </div>
-        <span class="battle-vs">VS</span>
-        <div class="battle-fighter">
-          <span class="battle-fighter-name ruben">RUBEN</span>
-          <span class="battle-fighter-val" id="battleRuben">—</span>
+        <div class="panel">
+          <div class="panel-title">OVERTAKE DAY</div>
+          <div class="predict-date" id="predictDate">—</div>
+          <div class="predict-sub" id="predictSub">LOADING...</div>
         </div>
       </div>
-      <div class="battle-verdict" id="battleVerdict"></div>
-    </div>
 
-    <!-- Combo streak -->
-    <div class="combo-bar" id="comboBar">
-      <span class="combo-count" id="comboCount"></span>
-      <span class="combo-label" id="comboLabel"></span>
-    </div>
-
-    <!-- Gap history chart -->
-    <div class="chart-box">
-      <div class="chart-title">GAP HISTORY</div>
-      <div class="chart-wrap">
-        <canvas id="gapChart"></canvas>
+      <!-- Right: chart -->
+      <div class="panel">
+        <div class="panel-title">GAP HISTORY</div>
+        <div class="chart-wrap">
+          <canvas id="gapChart"></canvas>
+        </div>
       </div>
     </div>
 
-    <!-- Overtake prediction -->
-    <div class="predict-box">
-      <div class="predict-label">OVERTAKE DAY</div>
-      <div class="predict-date" id="predictDate">—</div>
-      <div class="predict-sub" id="predictSub">LOADING DATA...</div>
-    </div>
-
+    <!-- Status + button -->
     <div class="status">
-      <div class="status-main" id="statusMain">ROUND 1... FIGHT!</div>
+      <div class="status-main" id="statusMain">FIGHT!</div>
       <div class="status-sub" id="statusSub"></div>
     </div>
-
-    <button id="refreshBtn">▶ PRESS START TO WIN ◀</button>
-    <div class="footer" id="footer"></div>
+    <div class="bottom-bar">
+      <button id="refreshBtn">▶ REFRESH ◀</button>
+      <div class="footer" id="footer"></div>
+    </div>
   </div>
 
   <script>
@@ -516,11 +478,10 @@
       'https://api.allorigins.win/raw?url=' + encodeURIComponent(CSV_URL),
     ];
 
-    /* ── helpers ── */
     async function fetchWithTimeout(url, ms = 9000) {
       const ctrl = new AbortController();
-      const tid  = setTimeout(() => ctrl.abort(), ms);
-      try   { const r = await fetch(url, { signal: ctrl.signal }); clearTimeout(tid); return r; }
+      const tid = setTimeout(() => ctrl.abort(), ms);
+      try { const r = await fetch(url, { signal: ctrl.signal }); clearTimeout(tid); return r; }
       catch (e) { clearTimeout(tid); throw e; }
     }
 
@@ -544,13 +505,12 @@
       return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
     }
 
-    /* ── gviz JSON parser ── */
     async function fetchFromGviz() {
       const r = await fetchWithTimeout(GVIZ_URL);
       if (!r.ok) throw new Error('gviz HTTP ' + r.status);
       const text = await r.text();
       const match = text.match(/setResponse\((\{[\s\S]+\})\)/);
-      if (!match) throw new Error('gviz: unexpected response format');
+      if (!match) throw new Error('gviz: unexpected format');
       const data = JSON.parse(match[1]);
       if (data.status !== 'ok') throw new Error('gviz status: ' + data.status);
 
@@ -563,28 +523,16 @@
         const ruben = typeof v(4) === 'number' ? v(4) : parseNum(f(4));
         if (!chris || !ruben) continue;
         const num = (i) => typeof v(i) === 'number' ? v(i) : parseNum(f(i));
-
         const rawDate = f(0) || '';
         const dateStr = (typeof rawDate === 'string' && rawDate && !rawDate.startsWith('Date(')) ? rawDate : '';
-        rows.push({
-          date: dateStr,
-          hour: String(f(1) || v(1) || ''),
-          chris,
-          chris_daily: num(3),
-          ruben,
-          ruben_daily: num(5),
-          gap: num(6),
-          growth_diff: num(7),
-        });
+        rows.push({ date: dateStr, hour: String(f(1) || v(1) || ''), chris, chris_daily: num(3), ruben, ruben_daily: num(5), gap: num(6), growth_diff: num(7) });
       }
       return rows;
     }
 
-    /* ── CSV parser fallback ── */
     function parseCSV(text) {
       return text.trim().split('\n').map(line => {
-        const fields = [];
-        let inQ = false, f = '';
+        const fields = []; let inQ = false, f = '';
         for (const ch of line) {
           if (ch === '"') { inQ = !inQ; continue; }
           if (ch === ',' && !inQ) { fields.push(f.trim()); f = ''; continue; }
@@ -598,75 +546,51 @@
     function processCSVRows(rows) {
       const data = [];
       for (const row of rows.slice(1)) {
-        const chris = parseNum(row[2]);
-        const ruben = parseNum(row[4]);
+        const chris = parseNum(row[2]), ruben = parseNum(row[4]);
         if (!chris || !ruben) continue;
-        data.push({
-          date: row[0] || '',
-          hour: row[1] || '',
-          chris,
-          chris_daily: parseNum(row[3]),
-          ruben,
-          ruben_daily: parseNum(row[5]),
-          gap: parseNum(row[6]),
-          growth_diff: parseNum(row[7]),
-        });
+        data.push({ date: row[0] || '', hour: row[1] || '', chris, chris_daily: parseNum(row[3]), ruben, ruben_daily: parseNum(row[5]), gap: parseNum(row[6]), growth_diff: parseNum(row[7]) });
       }
       return data;
     }
 
-    /* ── prediction ── */
     function calcOvertake(rows, currentGap) {
-      const validDiffs = rows
-        .map(r => r.growth_diff)
-        .filter(d => d !== null && d !== undefined);
-      if (validDiffs.length === 0) return null;
-      const todayDiff = validDiffs[validDiffs.length - 1];
+      const diffs = rows.map(r => r.growth_diff).filter(d => d !== null && d !== undefined);
+      if (!diffs.length) return null;
+      const todayDiff = diffs[diffs.length - 1];
       if (todayDiff <= 0) return { type: 'losing', avg: todayDiff };
       const days = currentGap / todayDiff;
       return { type: 'winning', days, avg: todayDiff, date: addDays(new Date(), days) };
     }
 
-    /* ── combo streak: count consecutive days Ruben beat Chris ── */
     function calcCombo(rows) {
       let streak = 0;
       for (let i = rows.length - 1; i >= 0; i--) {
-        const diff = rows[i].growth_diff;
-        if (diff === null || diff === undefined) continue;
-        if (diff > 0) streak++;
-        else break;
+        const d = rows[i].growth_diff;
+        if (d === null || d === undefined) continue;
+        if (d > 0) streak++; else break;
       }
       return streak;
     }
 
-    /* ── gap history chart (Chart.js) ── */
-    let gapChartInstance = null;
+    let chart = null;
     function renderGapChart(rows) {
-      const data = rows
-        .filter(r => r.gap !== null && r.gap !== undefined && r.date)
-        .map(r => ({ x: r.date, y: r.gap }));
-      if (data.length < 2) return;
-
+      const pts = rows.filter(r => r.gap != null && r.date).map(r => ({ x: r.date, y: r.gap }));
+      if (pts.length < 2) return;
       const canvas = document.getElementById('gapChart');
-      if (gapChartInstance) { gapChartInstance.destroy(); gapChartInstance = null; }
+      if (chart) { chart.destroy(); chart = null; }
 
-      const closing = data[data.length - 1].y < data[0].y;
-      const lineColor = closing ? '#44ff44' : '#ff4444';
-      const fillColor = closing ? 'rgba(68,255,68,0.08)' : 'rgba(255,68,68,0.08)';
-
-      gapChartInstance = new Chart(canvas, {
+      chart = new Chart(canvas, {
         type: 'line',
         data: {
           datasets: [{
-            data: data,
-            borderColor: lineColor,
-            backgroundColor: fillColor,
+            data: pts,
+            borderColor: '#ffcc00',
+            backgroundColor: 'rgba(255,204,0,0.05)',
             borderWidth: 2,
             pointRadius: 0,
-            pointHitRadius: 12,
-            pointHoverRadius: 5,
+            pointHitRadius: 10,
+            pointHoverRadius: 4,
             pointHoverBackgroundColor: '#ffcc00',
-            pointHoverBorderColor: '#fff',
             fill: true,
             tension: 0.3,
           }]
@@ -679,274 +603,201 @@
             legend: { display: false },
             tooltip: {
               backgroundColor: '#111',
-              borderColor: '#ffcc00',
+              borderColor: '#333',
               borderWidth: 1,
-              titleFont: { family: "'Press Start 2P', monospace", size: 7 },
-              bodyFont: { family: "'Press Start 2P', monospace", size: 9 },
-              titleColor: '#888',
+              titleFont: { family: "'Press Start 2P', monospace", size: 6 },
+              bodyFont: { family: "'Press Start 2P', monospace", size: 8 },
+              titleColor: '#666',
               bodyColor: '#ffcc00',
-              padding: 10,
+              padding: 8,
               displayColors: false,
               callbacks: {
-                title: (items) => items[0]?.raw?.x || '',
-                label: (item) => 'GAP: ' + fmt(item.raw.y),
+                title: (i) => i[0]?.raw?.x || '',
+                label: (i) => 'GAP: ' + fmt(i.raw.y),
               }
             }
           },
           scales: {
             x: {
               type: 'category',
-              ticks: {
-                color: '#333',
-                font: { family: "'Press Start 2P', monospace", size: 6 },
-                maxTicksLimit: 6,
-                maxRotation: 0,
-              },
-              grid: { color: '#1a1a1a' },
-              border: { color: '#333' },
+              ticks: { color: '#222', font: { family: "'Press Start 2P'", size: 5 }, maxTicksLimit: 5, maxRotation: 0 },
+              grid: { color: '#111' },
+              border: { color: '#222' },
             },
             y: {
-              ticks: {
-                color: '#444',
-                font: { family: "'Press Start 2P', monospace", size: 7 },
-                callback: (v) => fmt(v),
-              },
-              grid: { color: '#1a1a1a' },
-              border: { color: '#333' },
+              ticks: { color: '#333', font: { family: "'Press Start 2P'", size: 6 }, callback: v => fmt(v) },
+              grid: { color: '#111' },
+              border: { color: '#222' },
             }
           }
         }
       });
     }
 
-    /* ── trigger hit animation ── */
     function triggerHit(diff) {
       const el = document.getElementById('hitEffect');
       const container = document.getElementById('mainContainer');
-      const chrisEl = document.getElementById('fighterChris');
-      const rubenEl = document.getElementById('fighterRuben');
+      const c = document.getElementById('fighterChris');
+      const r = document.getElementById('fighterRuben');
 
-      if (diff > 0) {
-        // Ruben winning today
-        el.textContent = 'HIT!';
-        el.style.color = '#ffcc00';
-        chrisEl.classList.add('hurt');
-        rubenEl.classList.add('hit');
-      } else {
-        el.textContent = 'BLOCK!';
-        el.style.color = '#ff4444';
-        rubenEl.classList.add('hurt');
-        chrisEl.classList.add('hit');
-      }
+      el.textContent = diff > 0 ? 'HIT!' : 'BLOCK!';
+      if (diff > 0) { c.classList.add('hurt'); r.classList.add('hit'); }
+      else { r.classList.add('hurt'); c.classList.add('hit'); }
 
-      el.classList.remove('show');
-      void el.offsetWidth; // force reflow
-      el.classList.add('show');
-      container.classList.remove('shake');
-      void container.offsetWidth;
-      container.classList.add('shake');
+      el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+      container.classList.remove('shake'); void container.offsetWidth; container.classList.add('shake');
 
-      setTimeout(() => {
-        chrisEl.classList.remove('hit', 'hurt');
-        rubenEl.classList.remove('hit', 'hurt');
-      }, 600);
+      setTimeout(() => { c.classList.remove('hit','hurt'); r.classList.remove('hit','hurt'); }, 500);
     }
 
-    /* ── render ── */
     let firstRender = true;
     function renderUI(rows) {
       if (!rows.length) return;
       const d = rows[rows.length - 1];
       const { chris, ruben, gap, date, hour, chris_daily, ruben_daily, growth_diff } = d;
 
-      // Follower counts
+      // Counts in arena
       document.getElementById('chrisCount').textContent = fmt(chris);
       document.getElementById('rubenCount').textContent = fmt(ruben);
 
-      // Daily gains in arena
+      // Daily in arena
       if (chris_daily !== null) {
         const el = document.getElementById('chrisDaily');
-        el.textContent = (chris_daily >= 0 ? '+' : '') + fmt(chris_daily) + ' TODAY';
-        el.className = 'fighter-daily ' + (chris_daily > 0 ? 'up' : chris_daily < 0 ? 'down' : 'flat');
+        el.textContent = (chris_daily >= 0 ? '+' : '') + fmt(chris_daily) + '/DAY';
+        el.className = 'fighter-daily ' + (chris_daily > 0 ? 'up' : 'down');
       }
       if (ruben_daily !== null) {
         const el = document.getElementById('rubenDaily');
-        el.textContent = (ruben_daily >= 0 ? '+' : '') + fmt(ruben_daily) + ' TODAY';
-        el.className = 'fighter-daily ' + (ruben_daily > 0 ? 'up' : ruben_daily < 0 ? 'down' : 'flat');
+        el.textContent = (ruben_daily >= 0 ? '+' : '') + fmt(ruben_daily) + '/DAY';
+        el.className = 'fighter-daily ' + (ruben_daily > 0 ? 'up' : 'down');
       }
 
-      // HP bars — Chris HP depletes as Ruben catches up (gap / chris = how much lead Chris has left)
-      // Ruben HP = his followers as % of Chris's (how close he is to overtaking)
+      // Stats row
+      document.getElementById('chrisStat').textContent = fmt(chris);
+      document.getElementById('rubenStat').textContent = fmt(ruben);
+      if (chris_daily !== null) {
+        const el = document.getElementById('chrisDailyStat');
+        el.textContent = (chris_daily >= 0 ? '+' : '') + fmt(chris_daily) + ' TODAY';
+        el.className = 'stat-daily ' + (chris_daily > 0 ? 'up' : 'down');
+      }
+      if (ruben_daily !== null) {
+        const el = document.getElementById('rubenDailyStat');
+        el.textContent = (ruben_daily >= 0 ? '+' : '') + fmt(ruben_daily) + ' TODAY';
+        el.className = 'stat-daily ' + (ruben_daily > 0 ? 'up' : 'down');
+      }
+
+      // HP bars
       const chrisPct = Math.min(100, Math.max(0, (gap / chris) * 100));
       const rubenPct = Math.min(100, Math.max(0, (ruben / chris) * 100));
       document.getElementById('chrisHp').style.width = chrisPct + '%';
       document.getElementById('rubenHp').style.width = rubenPct + '%';
-      if (chrisPct < 20) document.getElementById('chrisHp').classList.add('critical');
+      if (chrisPct < 15) document.getElementById('chrisHp').classList.add('critical');
       else document.getElementById('chrisHp').classList.remove('critical');
 
       // Gap
-      if (gap <= 0) {
-        document.getElementById('gapNum').textContent = fmt(Math.abs(gap));
-        document.getElementById('gapNum').style.color = '#44ff44';
-      } else {
-        document.getElementById('gapNum').textContent = fmt(gap);
-        document.getElementById('gapNum').style.color = '#ffcc00';
-      }
+      document.getElementById('gapNum').textContent = fmt(Math.abs(gap));
 
       // Today's battle
-      const bChris = document.getElementById('battleChris');
-      const bRuben = document.getElementById('battleRuben');
-      const bVerdict = document.getElementById('battleVerdict');
+      const bC = document.getElementById('battleChris');
+      const bR = document.getElementById('battleRuben');
+      const bV = document.getElementById('battleVerdict');
       if (chris_daily !== null && ruben_daily !== null) {
-        bChris.textContent = '+' + fmt(chris_daily);
-        bRuben.textContent = '+' + fmt(ruben_daily);
+        bC.textContent = '+' + fmt(chris_daily);
+        bR.textContent = '+' + fmt(ruben_daily);
         if (growth_diff > 0) {
-          bRuben.className = 'battle-fighter-val winning';
-          bChris.className = 'battle-fighter-val losing';
-          const net = ruben_daily - chris_daily;
-          bVerdict.innerHTML = `RUBEN WINS! <span style="color:#ffcc00">+${fmt(net)} NET</span>`;
-          bVerdict.className = 'battle-verdict win';
+          bR.className = 'battle-val win';
+          bC.className = 'battle-val lose';
+          bV.textContent = 'RUBEN WINS  +' + fmt(ruben_daily - chris_daily) + ' NET';
+          bV.className = 'battle-verdict';
         } else if (growth_diff < 0) {
-          bChris.className = 'battle-fighter-val winning';
-          bRuben.className = 'battle-fighter-val losing';
-          bVerdict.textContent = 'CHRIS TAKES THIS ROUND...';
-          bVerdict.className = 'battle-verdict lose';
+          bC.className = 'battle-val win';
+          bR.className = 'battle-val lose';
+          bV.textContent = 'CHRIS TAKES THIS ROUND';
+          bV.className = 'battle-verdict lose';
         } else {
-          bChris.className = 'battle-fighter-val';
-          bRuben.className = 'battle-fighter-val';
-          bVerdict.textContent = 'DRAW!';
-          bVerdict.className = 'battle-verdict';
-          bVerdict.style.color = '#ffcc00';
+          bC.className = bR.className = 'battle-val';
+          bV.textContent = 'DRAW';
+          bV.className = 'battle-verdict';
         }
       }
 
-      // Combo streak
+      // Combo
       const combo = calcCombo(rows);
-      const comboBar = document.getElementById('comboBar');
-      const comboCount = document.getElementById('comboCount');
-      const comboLabel = document.getElementById('comboLabel');
-      if (combo > 0) {
-        comboCount.textContent = combo;
-        if (combo >= 10) {
-          comboLabel.textContent = 'ULTRA COMBO!!!';
-          comboBar.className = 'combo-bar fire';
-        } else if (combo >= 5) {
-          comboLabel.textContent = 'SUPER COMBO!';
-          comboBar.className = 'combo-bar fire';
-        } else if (combo >= 3) {
-          comboLabel.textContent = 'COMBO!';
-          comboBar.className = 'combo-bar';
-        } else {
-          comboLabel.textContent = combo === 1 ? 'DAY WIN STREAK' : 'DAY WIN STREAK';
-          comboBar.className = 'combo-bar';
-        }
+      const comboRow = document.getElementById('comboRow');
+      if (combo >= 2) {
+        comboRow.style.display = 'flex';
+        document.getElementById('comboNum').textContent = combo;
+        const label = combo >= 10 ? 'ULTRA COMBO!' : combo >= 5 ? 'SUPER COMBO!' : 'DAY STREAK';
+        document.getElementById('comboText').textContent = label;
+        comboRow.className = combo >= 5 ? 'combo-row hot' : 'combo-row';
       } else {
-        comboCount.textContent = '';
-        comboLabel.textContent = 'NO ACTIVE STREAK';
-        comboLabel.style.color = '#333';
-        comboBar.className = 'combo-bar';
+        comboRow.style.display = 'none';
       }
 
-      // Gap chart
+      // Chart
       renderGapChart(rows);
 
       // Prediction
       const p = calcOvertake(rows, gap);
       const dateEl = document.getElementById('predictDate');
-      const subEl  = document.getElementById('predictSub');
+      const subEl = document.getElementById('predictSub');
       if (!p) {
-        dateEl.textContent = '?';
-        dateEl.className = 'predict-date bad';
-        subEl.textContent = 'NOT ENOUGH DATA YET';
+        dateEl.textContent = '?'; dateEl.className = 'predict-date bad';
+        subEl.textContent = 'NOT ENOUGH DATA';
       } else if (gap <= 0) {
-        dateEl.textContent = 'DEFEATED!';
-        dateEl.className = 'predict-date';
-        subEl.textContent = 'RUBEN HAS OVERTAKEN CHRIS!';
+        dateEl.textContent = 'DEFEATED!'; dateEl.className = 'predict-date';
+        subEl.textContent = 'RUBEN HAS OVERTAKEN CHRIS';
       } else if (p.type === 'losing') {
-        dateEl.textContent = 'NEVER AT THIS PACE';
-        dateEl.className = 'predict-date bad';
-        subEl.textContent = `TODAY: ${fmt(Math.abs(p.avg))} FOLLOWERS/DAY BEHIND`;
+        dateEl.textContent = 'NEVER AT THIS PACE'; dateEl.className = 'predict-date bad';
+        subEl.textContent = fmt(Math.abs(p.avg)) + '/DAY BEHIND TODAY';
       } else {
-        dateEl.textContent = fmtDate(p.date);
-        dateEl.className = 'predict-date';
-        subEl.textContent = `IN ${Math.ceil(p.days)} DAYS  ·  +${fmt(p.avg)}/DAY NET TODAY`;
+        dateEl.textContent = fmtDate(p.date); dateEl.className = 'predict-date';
+        subEl.textContent = Math.ceil(p.days) + ' DAYS  ·  +' + fmt(p.avg) + '/DAY NET';
       }
 
       // Status
       const main = document.getElementById('statusMain');
-      const sub  = document.getElementById('statusSub');
+      const sub = document.getElementById('statusSub');
       main.className = 'status-main';
       if (gap <= 0) {
-        main.textContent = 'K.O.!';
-        main.className = 'status-main ko';
-        sub.textContent = 'RUBEN WINS! FLAWLESS VICTORY!';
+        main.textContent = 'K.O.!'; main.className = 'status-main ko';
+        sub.textContent = 'FLAWLESS VICTORY';
       } else {
         const pct = (gap / chris) * 100;
-        if (pct > 45) {
-          main.textContent = 'FIGHT!';
-          sub.textContent = growth_diff > 0 ? 'RUBEN IS CLOSING THE GAP!' : 'CHRIS IS PULLING AHEAD...';
-        } else if (pct > 15) {
-          main.textContent = 'CLOSING IN!';
-          sub.textContent = 'RUBEN IS GAINING GROUND!';
-        } else {
-          main.textContent = 'FINISH HIM!';
-          sub.textContent = 'CHRIS IS ON THE ROPES!';
-        }
+        if (pct > 45) { main.textContent = 'FIGHT!'; sub.textContent = growth_diff > 0 ? 'RUBEN IS CLOSING THE GAP' : 'CHRIS PULLS AHEAD'; }
+        else if (pct > 15) { main.textContent = 'CLOSING IN!'; sub.textContent = 'THE GAP IS SHRINKING'; }
+        else { main.textContent = 'FINISH HIM!'; sub.textContent = 'CHRIS IS ON THE ROPES'; }
       }
 
-      // Hit animation on first load
+      // Hit animation
       if (firstRender && growth_diff !== null) {
-        setTimeout(() => triggerHit(growth_diff), 800);
+        setTimeout(() => triggerHit(growth_diff), 600);
         firstRender = false;
       }
 
       // Footer
       document.getElementById('footer').innerHTML =
-        `<span class="live-dot"></span>LIVE &nbsp;&nbsp; LAST UPDATE: ${date}  ${hour}`;
+        `<span class="live-dot"></span>LIVE &nbsp; ${date} ${hour}`;
     }
 
-    /* ── fetch ── */
     async function loadLive() {
-      try {
-        const rows = await fetchFromGviz();
-        if (rows.length) { renderUI(rows); return; }
-      } catch (e) {
-        console.warn('gviz failed:', e.message);
-      }
-
+      try { const rows = await fetchFromGviz(); if (rows.length) { renderUI(rows); return; } }
+      catch (e) { console.warn('gviz:', e.message); }
       for (const url of PROXIES) {
-        try {
-          const r = await fetchWithTimeout(url);
-          if (!r.ok) continue;
-          const rows = processCSVRows(parseCSV(await r.text()));
-          if (rows.length) { renderUI(rows); return; }
-        } catch (e) {
-          console.warn('Proxy failed:', e.message);
-        }
+        try { const r = await fetchWithTimeout(url); if (!r.ok) continue; const rows = processCSVRows(parseCSV(await r.text())); if (rows.length) { renderUI(rows); return; } }
+        catch (e) { console.warn('proxy:', e.message); }
       }
-
-      try {
-        const r = await fetchWithTimeout('./data.json?t=' + Date.now());
-        const d = await r.json();
-        renderUI(d.history || [d.latest]);
-      } catch (e) {
-        document.getElementById('statusMain').textContent = 'ERROR';
-        document.getElementById('statusSub').textContent = 'COULD NOT LOAD DATA';
-      }
+      try { const r = await fetchWithTimeout('./data.json?t=' + Date.now()); const d = await r.json(); renderUI(d.history || [d.latest]); }
+      catch (e) { document.getElementById('statusMain').textContent = 'ERROR'; }
     }
 
-    function manualRefresh() {
+    document.getElementById('refreshBtn').addEventListener('click', () => {
       const btn = document.getElementById('refreshBtn');
-      btn.disabled = true;
-      btn.textContent = '⏳ LOADING...';
+      btn.disabled = true; btn.textContent = '...';
       firstRender = true;
-      loadLive().finally(() => {
-        btn.disabled = false;
-        btn.textContent = '▶ PRESS START TO WIN ◀';
-      });
-    }
+      loadLive().finally(() => { btn.disabled = false; btn.textContent = '▶ REFRESH ◀'; });
+    });
 
-    document.getElementById('refreshBtn').addEventListener('click', manualRefresh);
     loadLive();
     setInterval(loadLive, 10 * 60 * 1000);
   </script>
