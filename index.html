@@ -87,6 +87,22 @@
     .shake { animation: screen-shake 0.35s ease-out; }
     @keyframes screen-shake { 0%{transform:translate(0)} 25%{transform:translate(-4px,2px)} 50%{transform:translate(3px,-2px)} 75%{transform:translate(-2px,1px)} 100%{transform:translate(0)} }
 
+    /* Milestone */
+    .milestone-bar { margin-bottom: 0.5rem; }
+    .milestone-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+    .milestone-round { font-size: clamp(5px, 0.8vw, 7px); color: #444; letter-spacing: 2px; }
+    .milestone-target { font-size: clamp(7px, 1.2vw, 10px); color: #ffcc00; letter-spacing: 1px; }
+    .milestone-track { height: 14px; background: #111; border: 1px solid #222; position: relative; overflow: hidden; }
+    .milestone-fill { position: absolute; top: 0; left: 0; bottom: 0; background: linear-gradient(90deg, #663300, #ffcc00); transition: width 1.5s cubic-bezier(0.4,0,0.2,1); }
+    .milestone-fill.done { background: linear-gradient(90deg, #336600, #44ff44); }
+    .milestone-pct { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 5px; color: #000; font-family: 'Press Start 2P', monospace; z-index: 1; }
+    .milestone-sub { display: flex; justify-content: space-between; margin-top: 3px; font-size: clamp(4px, 0.55vw, 5px); color: #222; letter-spacing: 1px; }
+    .milestone-dots { display: flex; gap: 4px; margin-top: 6px; justify-content: center; }
+    .milestone-dot { width: 6px; height: 6px; border: 1px solid #333; background: #111; }
+    .milestone-dot.cleared { background: #ffcc00; border-color: #ffcc00; }
+    .milestone-dot.current { border-color: #ffcc00; animation: dot-pulse 1s ease-in-out infinite alternate; }
+    @keyframes dot-pulse { from{box-shadow:none} to{box-shadow:0 0 6px #ffcc00} }
+
     /* Bottom grid */
     .bottom-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 0.6rem; margin-top: 0.5rem; }
     @media (max-width: 500px) { .bottom-grid { grid-template-columns: 1fr; } }
@@ -191,6 +207,8 @@
       <span class="gap-row-num" id="gapNum">—</span>
       <span class="gap-row-lbl">GAP</span>
     </div>
+
+    <div class="milestone-bar" id="milestoneBar"></div>
 
     <div class="bottom-grid">
       <div>
@@ -373,9 +391,28 @@
       setTimeout(() => { c.classList.remove('hit','hurt'); r.classList.remove('hit','hurt'); }, 500);
     }
 
+    const MILESTONES = [
+      { target: 800000, label: '800K', round: 'ROUND 1' },
+      { target: 850000, label: '850K', round: 'ROUND 2' },
+      { target: 900000, label: '900K', round: 'ROUND 3' },
+      { target: 950000, label: '950K', round: 'ROUND 4' },
+      { target: 1000000, label: '1M', round: 'ROUND 5' },
+    ];
+
+    function fillMissingDailies(rows) {
+      for (let i = 1; i < rows.length; i++) {
+        const prev = rows[i - 1], cur = rows[i];
+        if (cur.chris_daily == null && prev.chris != null) cur.chris_daily = cur.chris - prev.chris;
+        if (cur.ruben_daily == null && prev.ruben != null) cur.ruben_daily = cur.ruben - prev.ruben;
+        if (cur.growth_diff == null && cur.ruben_daily != null && cur.chris_daily != null) cur.growth_diff = cur.ruben_daily - cur.chris_daily;
+        if (cur.gap == null && cur.chris != null && cur.ruben != null) cur.gap = cur.chris - cur.ruben;
+      }
+    }
+
     let firstRender = true;
     function renderUI(rows) {
       if (!rows.length) return;
+      fillMissingDailies(rows);
       const d = rows[rows.length - 1];
       const { chris, ruben, gap, date, hour, chris_daily, ruben_daily, growth_diff } = d;
 
@@ -384,12 +421,51 @@
       if (chris_daily != null) { const el = document.getElementById('chrisDaily'); el.textContent = (chris_daily >= 0 ? '+' : '') + fmt(chris_daily) + '/DAY'; el.className = 'daily ' + (chris_daily > 0 ? 'up' : ''); }
       if (ruben_daily != null) { const el = document.getElementById('rubenDaily'); el.textContent = (ruben_daily >= 0 ? '+' : '') + fmt(ruben_daily) + '/DAY'; el.className = 'daily ' + (ruben_daily > 0 ? 'up' : ''); }
 
-      const chrisPct = Math.min(100, Math.max(0, (gap / chris) * 100));
-      const rubenPct = Math.min(100, Math.max(0, (ruben / chris) * 100));
+      // HP bars: Chris HP = gap remaining / initial gap. Ruben HP = damage dealt.
+      const initialGap = rows[0].gap || gap;
+      const chrisPct = Math.min(100, Math.max(0, (gap / initialGap) * 100));
+      const rubenPct = 100 - chrisPct;
       document.getElementById('chrisHp').style.width = chrisPct + '%';
       document.getElementById('rubenHp').style.width = rubenPct + '%';
-      if (chrisPct < 15) document.getElementById('chrisHp').classList.add('critical');
+      if (chrisPct < 20) document.getElementById('chrisHp').classList.add('critical');
       else document.getElementById('chrisHp').classList.remove('critical');
+
+      // Milestones
+      const currentIdx = MILESTONES.findIndex(m => ruben < m.target);
+      const active = currentIdx >= 0 ? MILESTONES[currentIdx] : null;
+      const prevTarget = currentIdx > 0 ? MILESTONES[currentIdx - 1].target : (MILESTONES.length > 0 ? 750000 : ruben);
+      const mBar = document.getElementById('milestoneBar');
+      if (active) {
+        const pct = Math.min(100, Math.max(0, ((ruben - prevTarget) / (active.target - prevTarget)) * 100));
+        const remaining = active.target - ruben;
+        const dots = MILESTONES.map((m, i) => `<div class="milestone-dot ${i < currentIdx ? 'cleared' : i === currentIdx ? 'current' : ''}"></div>`).join('');
+        mBar.innerHTML = `
+          <div class="milestone-header">
+            <span class="milestone-round">${active.round}</span>
+            <span class="milestone-target">NEXT: ${active.label}</span>
+          </div>
+          <div class="milestone-track">
+            <div class="milestone-fill" style="width:${pct}%"></div>
+            <span class="milestone-pct">${Math.round(pct)}%</span>
+          </div>
+          <div class="milestone-sub">
+            <span>${fmt(prevTarget)}</span>
+            <span>${fmt(remaining)} TO GO</span>
+            <span>${active.label}</span>
+          </div>
+          <div class="milestone-dots">${dots}</div>`;
+      } else {
+        const dots = MILESTONES.map(() => `<div class="milestone-dot cleared"></div>`).join('');
+        mBar.innerHTML = `
+          <div class="milestone-header">
+            <span class="milestone-round">FINAL BOSS</span>
+            <span class="milestone-target">OVERTAKE CHRIS</span>
+          </div>
+          <div class="milestone-track">
+            <div class="milestone-fill done" style="width:${Math.min(100, (ruben / chris) * 100)}%"></div>
+          </div>
+          <div class="milestone-dots">${dots}<div class="milestone-dot current"></div></div>`;
+      }
 
       document.getElementById('gapNum').textContent = fmt(Math.abs(gap));
 
